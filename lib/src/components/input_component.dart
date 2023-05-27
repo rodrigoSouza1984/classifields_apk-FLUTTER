@@ -10,6 +10,7 @@ class InputComponent extends StatefulWidget {
   final bool isSecret;  
   final TextInputType? keyboardType;
   final TextEditingController? controller;
+  final String? Function(String?)? validator;
 
   bool isObscure = false;//don't need receive by constructor
 
@@ -22,6 +23,7 @@ class InputComponent extends StatefulWidget {
     this.isDate = false,   
     this.isSecret = false,		
     this.controller,
+    this.validator,
     }) : super(key: key);
 
   @override
@@ -81,6 +83,7 @@ class _InputComponentState extends State<InputComponent> {
         obscureText: isObscure,
         keyboardType: widget.keyboardType,
         readOnly: widget.readOnly,
+        validator: widget.validator,
         decoration: InputDecoration(
           prefixIcon: Icon(widget.icon),  
           suffixIcon: widget.isSecret 
