@@ -1,4 +1,5 @@
 import 'package:classifields_apk_flutter/src/pages/signIn/sign_in_screen.dart';
+import 'package:classifields_apk_flutter/src/pages/splashScreen/splash_screen.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -14,10 +15,10 @@ class MyApp extends StatelessWidget {
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(        
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        primarySwatch: Colors.green,
         useMaterial3: true,
       ),
-      home: const SignInScreen(),
+      home: SignInScreen(),
     );
   }
 }
