@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:classifields_apk_flutter/src/components/input_component.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
+import 'package:classifields_apk_flutter/src/controllers/sign_in_controller.dart';
 
 class SignInScreen extends StatelessWidget {
   SignInScreen({Key? key}) : super(key: key);
+
+  final SignInController authController = SignInController();
 
   final emailCtrl = TextEditingController();
   final passwordCtrl = TextEditingController();
@@ -139,7 +142,18 @@ class SignInScreen extends StatelessWidget {
                             if (_formkey.currentState!.validate()) {
                               String email = emailCtrl.text;
                               String password = passwordCtrl.text;
-                              print('${email}, ${password}');
+                              print('${email}, ${password}, inputs');
+
+                              authController
+                                  .signIn(email: email, password: password)
+                                  .then((value) => {
+                                        emailCtrl.text = '',
+                                        passwordCtrl.text = '',
+                                        Navigator.of(context).pushNamed(
+                                          '/home',
+                                          arguments: null,
+                                        )
+                                      });
                             } else {
                               print('Campos não válidos');
                             }
@@ -167,7 +181,7 @@ class SignInScreen extends StatelessWidget {
                           ),
                         ),
                       ),
-                    ),                                       
+                    ),
 
                     //LINHA CINZA DIVIDIDA EM 2 COM PALAVRA OU NO MEIO
                     Row(

@@ -19,15 +19,15 @@ class UserModel {
     this.mediaAvatar
   });   
 
-  factory UserModel.fromMap(Map<String, dynamic> map){//converte um map em um objeto
+  factory UserModel.fromMap(Map<String, dynamic> map) {
     return UserModel(
-      id: map['id'],
-      realName: map['realName'],
-      userName: map['userName'],
-      email: map['email'],
-      dateOfBirth: map['dateOfBirth'],      
-      token: map['access_token'], 
-      mediaAvatar: UserMediaAvatarModel.fromMap(map['mediaAvatar']),
+      id: map['user']['id'],
+      realName: map['user']['realName'],
+      userName: map['user']['userName'],
+      email: map['user']['email'],
+      dateOfBirth: map['user']['dateOfBirth'],
+      token: map['access_token'],
+      mediaAvatar: UserMediaAvatarModel.fromMap(map['user']['mediaAvatar']),
     );
   }
 
