@@ -24,6 +24,7 @@ class _SplashScreenState extends State<SplashScreen> {
             print(value == true),
             if (value != true)
               {
+                print('aki para login splash'),
                 Navigator.of(context).pushNamed(
                   '/login',
                   arguments: null,

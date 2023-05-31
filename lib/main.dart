@@ -1,6 +1,7 @@
 import 'package:classifields_apk_flutter/src/pages/signIn/sign_in_screen.dart';
 import 'package:classifields_apk_flutter/src/pages/splashScreen/splash_screen.dart';
 import 'package:classifields_apk_flutter/src/pages/home/home.dart';
+import 'package:classifields_apk_flutter/src/services/navigator_service_without_context.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -20,8 +21,9 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(        
         primarySwatch: Colors.green,
         useMaterial3: true,
-      ),
+      ),      
       //home: Home(),
+      navigatorKey: NavigationService.navigatorKey,//aki para navegar sem contexto
       initialRoute: '/splash',				
       routes: {							        
         '/splash': (ctx) => const SplashScreen(),
