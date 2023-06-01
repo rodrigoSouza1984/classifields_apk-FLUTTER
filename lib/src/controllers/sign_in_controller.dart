@@ -106,9 +106,7 @@ class SignInController {
 
       Map<String, dynamic> body = {'oldToken': token};
 
-      await logout();
-
-      
+      await logout();      
 
       http.Response response = await http
           .post(Uri.parse('${env.baseUrl}/token/refreshToken'), body: body);
