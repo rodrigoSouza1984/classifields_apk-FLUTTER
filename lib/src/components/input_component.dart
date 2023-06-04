@@ -81,7 +81,7 @@ class _InputComponentState extends State<InputComponent> {
           }          
         },
         obscureText: isObscure,
-        keyboardType: widget.keyboardType,
+        //keyboardType: widget.keyboardType,
         readOnly: widget.readOnly,
         validator: widget.validator,
         decoration: InputDecoration(

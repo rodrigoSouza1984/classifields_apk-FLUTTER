@@ -1,3 +1,4 @@
+import 'package:classifields_apk_flutter/src/pages/register/register.dart';
 import 'package:classifields_apk_flutter/src/pages/signIn/sign_in_screen.dart';
 import 'package:classifields_apk_flutter/src/pages/splashScreen/splash_screen.dart';
 import 'package:classifields_apk_flutter/src/pages/home/home.dart';
@@ -20,7 +21,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(        
         primarySwatch: Colors.green,
-        useMaterial3: true,
+        scaffoldBackgroundColor: Colors.white.withAlpha(190)        
       ),      
       //home: Home(),
       navigatorKey: NavigationService.navigatorKey,//aki para navegar sem contexto
@@ -28,7 +29,8 @@ class MyApp extends StatelessWidget {
       routes: {							        
         '/splash': (ctx) => const SplashScreen(),
         '/login': (ctx) => SignInScreen(),
-        '/home': (ctx) => Home()
+        '/home': (ctx) => Home(),
+        '/register': (ctx) => Register(),
       },
     );
   }

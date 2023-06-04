@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:classifields_apk_flutter/src/components/input_component.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:classifields_apk_flutter/src/controllers/sign_in_controller.dart';
+import 'package:classifields_apk_flutter/src/services/navigator_service_without_context.dart';
+import 'package:classifields_apk_flutter/src/config/color_config_apk.dart';
 
 class SignInScreen extends StatelessWidget {
   SignInScreen({Key? key}) : super(key: key);
@@ -19,7 +21,7 @@ class SignInScreen extends StatelessWidget {
     final sizeTela = MediaQuery.of(context).size;
 
     return Scaffold(
-      backgroundColor: Colors.green,
+      backgroundColor: CustomColors.customSwatchColor,
       body: SingleChildScrollView(
         child: SizedBox(
           height: sizeTela.height,
@@ -147,12 +149,18 @@ class SignInScreen extends StatelessWidget {
                               authController
                                   .signIn(email: email, password: password)
                                   .then((value) => {
-                                        emailCtrl.text = '',
-                                        passwordCtrl.text = '',
-                                        Navigator.of(context).pushNamed(
-                                          '/home',
-                                          arguments: null,
-                                        )
+                                        print('$value, return button'),
+                                        if (value == true)
+                                          {
+                                            emailCtrl.text = '',
+                                            passwordCtrl.text = '',
+                                            Navigator.of(context).pushNamed(
+                                              '/home',
+                                              arguments: null,
+                                            )
+                                          }else{
+                                            print('Login não realizados emial ou password inválido')
+                                          }
                                       });
                             } else {
                               print('Campos não válidos');
@@ -217,7 +225,9 @@ class SignInScreen extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(18)),
                             side: const BorderSide(
                                 width: 2, color: Colors.green)),
-                        onPressed: () {},
+                        onPressed: () {
+                          NavigationService.pushNamed('/register');
+                        },
                         child: const Text(
                           'Criar conta',
                           style: TextStyle(

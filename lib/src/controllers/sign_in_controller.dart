@@ -13,7 +13,7 @@ final client = LoggingInterceptor();
 class SignInController {
   final storageService = StorageService();
 
-  Future<void> signIn({required String email, required String password}) async {
+  Future<dynamic> signIn({required String email, required String password}) async {
     try {
       Map<String, dynamic> body = {'email': email, 'password': password};
 
@@ -44,10 +44,13 @@ class SignInController {
             print('Objeto User Logado: ${user.realName}');
 
             print('Objeto User Logado: ${user}');
+
+            return true;
           }
         }
       } else {
         print('aconteceu um erro: ${response.statusCode}');
+        return false;
       }
     } catch (e) {
       throw Exception('Error in create user');
