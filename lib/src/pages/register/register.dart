@@ -6,7 +6,7 @@ import 'package:classifields_apk_flutter/src/controllers/user_controller.dart';
 class Register extends StatelessWidget {
   Register({Key? key}) : super(key: key);
 
-  final UserController userController = UserController();  
+  final UserController userController = UserController();
 
   bool validarSenha(String password) {
     RegExp regex = RegExp(r'^(?=.*[0-9])(?=.*[\W_]).{7,}$');
@@ -19,13 +19,12 @@ class Register extends StatelessWidget {
     print('$value');
 
     return value;
-  }  
+  }
 
   int? validateBirthDateOver18YearsOld(String birthDate) {
-    
     if (birthDate == null || birthDate.isEmpty) {
       return null;
-    }    
+    }
 
     // Parse da data de nascimento recebida
     final birthYear = int.parse(birthDate.substring(6));
@@ -34,11 +33,11 @@ class Register extends StatelessWidget {
     final currentYear = DateTime.now().year;
 
     // Cálculo da diferença de idade
-    final ageDifference = currentYear - birthYear;      
+    final ageDifference = currentYear - birthYear;
 
     return ageDifference;
   }
-  
+
   List<dynamic>? nickNameValidator = [];
 
   final birthdateController = TextEditingController();
@@ -67,12 +66,15 @@ class Register extends StatelessWidget {
                 children: [
                   //TITULO DA TELA
                   const Expanded(
-                    child: Center(
-                      child: Text(
-                        'Cadastro',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 35,
+                    child: Padding(
+                      padding: EdgeInsets.only(top: 60),
+                      child: Center(
+                        child: Text(
+                          'Cadastro',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 35,
+                          ),
                         ),
                       ),
                     ),
@@ -80,10 +82,12 @@ class Register extends StatelessWidget {
 
                   //CONTAINER FORMULARIO
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 32,
-                      vertical: 40,
-                    ),
+                    padding: const EdgeInsets.only(
+                        top: 20, 
+                        left: 32, 
+                        right: 32, 
+                        bottom: 40
+                    ),                    
                     decoration: const BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.vertical(
@@ -94,6 +98,36 @@ class Register extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
+                          // Avatar
+                          Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              const CircleAvatar(
+                                radius: 50,
+                                backgroundColor: Colors.grey,
+                                backgroundImage:
+                                    AssetImage('assets/images/avatarzinho.jpg'),
+                              ),
+                              Positioned(
+                                top: 65,
+                                bottom: 0,
+                                child: IconButton(
+                                  onPressed: () {
+                                    // Ação ao pressionar o ícone da câmera
+                                  },
+                                  icon: const Icon(
+                                    Icons.camera_alt,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          const SizedBox(
+                            height: 20,
+                          ),
+
                           InputComponent(
                             controller: nickNameController,
                             keyboardType: TextInputType.text,
@@ -152,8 +186,10 @@ class Register extends StatelessWidget {
                                 return 'Cadastre sua data de nascimento';
                               }
 
-                              if(validateBirthDateOver18YearsOld(birthdateController.text)! < 18 ){
-                                return 'É necessário ter pelo menos 18 anos para se cadastrar.'; 
+                              if (validateBirthDateOver18YearsOld(
+                                      birthdateController.text)! <
+                                  18) {
+                                return 'É necessário ter pelo menos 18 anos para se cadastrar.';
                               }
 
                               return null;
@@ -209,7 +245,7 @@ class Register extends StatelessWidget {
 
                                   nickNameValidator =
                                       await createUserNameUnique(
-                                          nickNameController.text);                                                                       
+                                          nickNameController.text);
 
                                   if (_formkey.currentState!.validate()) {
                                     String realName = realNameController.text;
