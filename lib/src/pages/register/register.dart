@@ -1,9 +1,45 @@
 import 'package:flutter/material.dart';
 import 'package:classifields_apk_flutter/src/config/color_config_apk.dart';
 import 'package:classifields_apk_flutter/src/components/input_component.dart';
+import 'package:classifields_apk_flutter/src/controllers/user_controller.dart';
 
 class Register extends StatelessWidget {
   Register({Key? key}) : super(key: key);
+
+  final UserController userController = UserController();  
+
+  bool validarSenha(String password) {
+    RegExp regex = RegExp(r'^(?=.*[0-9])(?=.*[\W_]).{7,}$');
+    return regex.hasMatch(password);
+  }
+
+  Future<dynamic>? createUserNameUnique(String userName) async {
+    dynamic value = await userController.createUserNameUnique(userName);
+
+    print('$value');
+
+    return value;
+  }  
+
+  int? validateBirthDateOver18YearsOld(String birthDate) {
+    
+    if (birthDate == null || birthDate.isEmpty) {
+      return null;
+    }    
+
+    // Parse da data de nascimento recebida
+    final birthYear = int.parse(birthDate.substring(6));
+
+    // Ano atual
+    final currentYear = DateTime.now().year;
+
+    // Cálculo da diferença de idade
+    final ageDifference = currentYear - birthYear;      
+
+    return ageDifference;
+  }
+  
+  List<dynamic>? nickNameValidator = [];
 
   final birthdateController = TextEditingController();
   final nickNameController = TextEditingController();
@@ -54,7 +90,6 @@ class Register extends StatelessWidget {
                           top: Radius.circular(45),
                         )),
                     child: Form(
-                      //autovalidateMode: AutovalidateMode.onUserInteraction,
                       key: _formkey,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -70,6 +105,9 @@ class Register extends StatelessWidget {
                               }
                               if (nickName.length < 2) {
                                 return 'Digite um nickname com pelo menos 2 caracteres.';
+                              }
+                              if (nickNameValidator?[0] != nickName) {
+                                return 'NickName já existe , \nsugestões: ${nickNameValidator?[0]} , \n${nickNameValidator?[1]} , ${nickNameValidator?[2]}';
                               }
 
                               return null;
@@ -113,6 +151,11 @@ class Register extends StatelessWidget {
                               if (bithDate == null || bithDate.isEmpty) {
                                 return 'Cadastre sua data de nascimento';
                               }
+
+                              if(validateBirthDateOver18YearsOld(birthdateController.text)! < 18 ){
+                                return 'É necessário ter pelo menos 18 anos para se cadastrar.'; 
+                              }
+
                               return null;
                             },
                           ),
@@ -125,6 +168,10 @@ class Register extends StatelessWidget {
                             validator: (password) {
                               if (password == null || password.isEmpty) {
                                 return 'Digite sua senha';
+                              }
+
+                              if (!validarSenha(password)) {
+                                return 'Digite uma senha com pelo menos 7 caracteres \ncom no minimo 1 caracter especial \ne 1 letra maiuscula.';
                               }
 
                               return null;
@@ -158,6 +205,12 @@ class Register extends StatelessWidget {
                                         borderRadius:
                                             BorderRadius.circular(18))),
                                 onPressed: () async {
+                                  FocusScope.of(context).unfocus();
+
+                                  nickNameValidator =
+                                      await createUserNameUnique(
+                                          nickNameController.text);                                                                       
+
                                   if (_formkey.currentState!.validate()) {
                                     String realName = realNameController.text;
                                     String nickName = nickNameController.text;

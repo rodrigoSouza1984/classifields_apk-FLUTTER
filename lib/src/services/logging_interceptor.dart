@@ -10,7 +10,7 @@ class LoggingInterceptor extends http.BaseClient {
   @override
   Future<http.StreamedResponse> send(http.BaseRequest request) async {
     final response = await _httpClient.send(request);
-
+    print('${response.statusCode}, response.statusCode');
     if (response.statusCode == 401) {
       final newToken = await authController.refreshToken();
       final updatedRequest = http.Request(request.method, request.url);
