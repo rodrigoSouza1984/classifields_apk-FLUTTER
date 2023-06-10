@@ -1,12 +1,27 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:classifields_apk_flutter/src/config/color_config_apk.dart';
 import 'package:classifields_apk_flutter/src/components/input_component.dart';
 import 'package:classifields_apk_flutter/src/controllers/user_controller.dart';
+import 'package:classifields_apk_flutter/src/services/image_video_photo_image_picker.dart';
+import 'package:classifields_apk_flutter/src/components/menu_modal_icon_buttons.dart';
 
-class Register extends StatelessWidget {
+
+class Register extends StatefulWidget {
   Register({Key? key}) : super(key: key);
 
+  @override
+  State<Register> createState() => _RegisterState();
+}
+
+class _RegisterState extends State<Register> {
+  File? _image;
+  String? _imagePath;
+
   final UserController userController = UserController();
+
+  final imageVideoPhotoService = ImageVideoPhotoService();
 
   bool validarSenha(String password) {
     RegExp regex = RegExp(r'^(?=.*[0-9])(?=.*[\W_]).{7,}$');
@@ -36,16 +51,22 @@ class Register extends StatelessWidget {
     final ageDifference = currentYear - birthYear;
 
     return ageDifference;
-  }
+  }  
 
   List<dynamic>? nickNameValidator = [];
 
   final birthdateController = TextEditingController();
+
   final nickNameController = TextEditingController();
+
   final realNameController = TextEditingController();
+
   final emailController = TextEditingController();
+
   final bithDateController = TextEditingController();
+
   final passwordController = TextEditingController();
+
   final confirmPasswordController = TextEditingController();
 
   final _formkey = GlobalKey<FormState>();
@@ -83,11 +104,7 @@ class Register extends StatelessWidget {
                   //CONTAINER FORMULARIO
                   Container(
                     padding: const EdgeInsets.only(
-                        top: 20, 
-                        left: 32, 
-                        right: 32, 
-                        bottom: 40
-                    ),                    
+                        top: 20, left: 32, right: 32, bottom: 40),
                     decoration: const BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.vertical(
@@ -102,18 +119,56 @@ class Register extends StatelessWidget {
                           Stack(
                             alignment: Alignment.center,
                             children: [
-                              const CircleAvatar(
+                              CircleAvatar(
                                 radius: 50,
                                 backgroundColor: Colors.grey,
-                                backgroundImage:
-                                    AssetImage('assets/images/avatarzinho.jpg'),
+                                backgroundImage: _imagePath != null
+                                    ? FileImage(File(_imagePath!))
+                                    : const Image(
+                                        image: AssetImage(
+                                            'assets/images/avatarzinho.jpg'),
+                                      ).image as ImageProvider<Object>?,
                               ),
                               Positioned(
                                 top: 65,
                                 bottom: 0,
                                 child: IconButton(
-                                  onPressed: () {
-                                    // Ação ao pressionar o ícone da câmera
+                                  onPressed: () async {
+                                    final result =
+                                        await showModalBottomSheet<dynamic>(
+                                      context: context,
+                                      shape: const RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.vertical(
+                                            top: Radius.circular(45)),
+                                      ),
+                                      builder: (BuildContext context) {
+                                        return MenuModalIconButtons(
+                                          title: 'Título do Modal',
+                                          icon: Icons.delete,
+                                          iconsWithTitles: const [
+                                            MapEntry(
+                                                Icons.camera_alt, 'Câmera'),
+                                            MapEntry(Icons.photo, 'Foto'),
+                                            // MapEntry(
+                                            //     Icons.video_library, 'Vídeo'),
+                                          ],
+                                        );
+                                      },
+                                    );
+                                    print(
+                                        'Resultado do modal: ${result['selectedItem'] == ''}');
+
+                                    if (result['selectedItem'] != '') {
+                                      setState(() {
+                                        _image = result['image'];
+                                        _imagePath = result['imagePath'];
+                                      });
+                                    } else {
+                                      setState(() {
+                                        _image = null;
+                                        _imagePath = null;
+                                      });
+                                    }
                                   },
                                   icon: const Icon(
                                     Icons.camera_alt,

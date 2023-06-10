@@ -4,6 +4,7 @@ import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:classifields_apk_flutter/src/controllers/sign_in_controller.dart';
 import 'package:classifields_apk_flutter/src/services/navigator_service_without_context.dart';
 import 'package:classifields_apk_flutter/src/config/color_config_apk.dart';
+import 'package:classifields_apk_flutter/src/components/toast_message_component.dart';
 
 class SignInScreen extends StatelessWidget {
   SignInScreen({Key? key}) : super(key: key);
@@ -15,6 +16,24 @@ class SignInScreen extends StatelessWidget {
   final birthdateCtrl = TextEditingController();
 
   final _formkey = GlobalKey<FormState>();
+
+  void showMyToast(BuildContext context, String message, Duration duration) {
+    OverlayEntry overlayEntry;
+
+    overlayEntry = OverlayEntry(
+      builder: (context) => ToastModal(message: message, duration: duration,),
+    );
+
+    Overlay.of(context).insert(overlayEntry);    
+
+    // Future.delayed(Duration(seconds: 3), () {//SEM PARAMETRO O TEMPO
+    //   overlayEntry.remove();    
+    // });
+
+    Future.delayed(duration, () {//POR PARAMETRO O TEMPO
+      overlayEntry.remove();    
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -150,16 +169,18 @@ class SignInScreen extends StatelessWidget {
                                   .signIn(email: email, password: password)
                                   .then((value) => {
                                         print('$value, return button'),
-                                        if (value == true)
-                                          {
+                                        if (value == true)                                        
+                                          {                                               
                                             emailCtrl.text = '',
                                             passwordCtrl.text = '',
                                             Navigator.of(context).pushNamed(
                                               '/home',
                                               arguments: null,
                                             )
-                                          }else{
-                                            print('Login não realizados emial ou password inválido')
+                                          }
+                                        else
+                                          {
+                                            showMyToast(context, 'Login não realizado, Email ou Password inválido', const Duration(seconds: 3))                                            
                                           }
                                       });
                             } else {

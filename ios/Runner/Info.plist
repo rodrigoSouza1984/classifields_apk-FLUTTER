@@ -34,6 +34,14 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>We need access to let you pick an image</string>
+	<key>NSCameraUsageDescription</key>
+	<string>We need access to let you pick an image</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>We need access to let you pick an image</string>
+	
 	<key>UISupportedInterfaceOrientations~ipad</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
