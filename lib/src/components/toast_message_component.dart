@@ -5,7 +5,8 @@ class ToastModal extends StatefulWidget {
   final String message;
   final Duration? duration;
 
-  const ToastModal({Key? key, required this.message, required this.duration}) : super(key: key);
+  const ToastModal({Key? key, required this.message, required this.duration})
+      : super(key: key);
 
   @override
   _ToastModalState createState() => _ToastModalState();
@@ -26,12 +27,12 @@ class _ToastModalState extends State<ToastModal> {
       builder: (context) {
         final screenWidth = MediaQuery.of(context).size.width;
         final modalWidth = screenWidth * 0.9; // 90% do tamanho da tela
+        final padding = EdgeInsets.all(8.0); // Padding nos 4 lados do texto
 
         return Positioned(
           top: MediaQuery.of(context).size.height * 0.5,
           left: (screenWidth - modalWidth) / 2,
           width: modalWidth,
-          height: 50.0,
           child: Material(
             color: Colors.transparent,
             child: Container(
@@ -39,13 +40,12 @@ class _ToastModalState extends State<ToastModal> {
                 color: Colors.black54,
                 borderRadius: BorderRadius.circular(10.0),
               ),
-              child: Center(
-                child: Text(
-                  widget.message,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 16.0,
-                  ),
+              padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0), // Padding interno do container
+              child: Text(
+                widget.message,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 16.0,
                 ),
               ),
             ),
@@ -53,8 +53,8 @@ class _ToastModalState extends State<ToastModal> {
         );
       },
     );
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Overlay.of(context).insert(overlayEntry);
+    WidgetsBinding.instance!.addPostFrameCallback((_) {
+      Overlay.of(context)!.insert(overlayEntry);
     });
   }
 

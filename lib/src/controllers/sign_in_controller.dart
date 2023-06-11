@@ -6,6 +6,8 @@ import 'package:classifields_apk_flutter/src/models/user_model.dart';
 import 'package:classifields_apk_flutter/src/services/storage_service.dart';
 import 'package:classifields_apk_flutter/src/services/logging_interceptor.dart';
 
+import 'package:classifields_apk_flutter/src/components/toast_message_component.dart';
+
 final env = Environments();
 
 final client = LoggingInterceptor();
@@ -159,4 +161,36 @@ class SignInController {
       throw Exception('$err ,Error in create user');
     }
   }
+
+
+  Future<dynamic> forgetedPassword({required String email}) async {
+    try {       
+
+      Map<String, dynamic> body = {'email': email};
+
+      await logout();      
+
+      http.Response response = await http
+          .post(Uri.parse('${env.baseUrl}/user/forgetedOrUpdatePassword'), body: body);
+
+      print('${response.statusCode} controller');
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+
+        Map<String, dynamic> responseJson = json.decode(response.body);
+
+        print('${responseJson}, forgeted password, ${responseJson['message']}'); 
+
+        String message = responseJson['message'];        
+
+        return message; 
+
+      } else {
+        print('aconteceu um erro: ${response.statusCode}');
+        return null;
+      }
+    } catch (e) {
+      throw Exception('Error in create user');
+    }
+  }
+
 }

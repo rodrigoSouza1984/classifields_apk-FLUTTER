@@ -5,6 +5,7 @@ import 'package:classifields_apk_flutter/src/controllers/sign_in_controller.dart
 import 'package:classifields_apk_flutter/src/services/navigator_service_without_context.dart';
 import 'package:classifields_apk_flutter/src/config/color_config_apk.dart';
 import 'package:classifields_apk_flutter/src/components/toast_message_component.dart';
+import 'package:classifields_apk_flutter/src/components/center_modal_inputs_buttons.dart';
 
 class SignInScreen extends StatelessWidget {
   SignInScreen({Key? key}) : super(key: key);
@@ -15,23 +16,29 @@ class SignInScreen extends StatelessWidget {
   final passwordCtrl = TextEditingController();
   final birthdateCtrl = TextEditingController();
 
+  final emailCtrl2 = TextEditingController();
+
   final _formkey = GlobalKey<FormState>();
 
   void showMyToast(BuildContext context, String message, Duration duration) {
     OverlayEntry overlayEntry;
 
     overlayEntry = OverlayEntry(
-      builder: (context) => ToastModal(message: message, duration: duration,),
+      builder: (context) => ToastModal(
+        message: message,
+        duration: duration,
+      ),
     );
 
-    Overlay.of(context).insert(overlayEntry);    
+    Overlay.of(context).insert(overlayEntry);
 
     // Future.delayed(Duration(seconds: 3), () {//SEM PARAMETRO O TEMPO
-    //   overlayEntry.remove();    
+    //   overlayEntry.remove();
     // });
 
-    Future.delayed(duration, () {//POR PARAMETRO O TEMPO
-      overlayEntry.remove();    
+    Future.delayed(duration, () {
+      //POR PARAMETRO O TEMPO
+      overlayEntry.remove();
     });
   }
 
@@ -169,8 +176,8 @@ class SignInScreen extends StatelessWidget {
                                   .signIn(email: email, password: password)
                                   .then((value) => {
                                         print('$value, return button'),
-                                        if (value == true)                                        
-                                          {                                               
+                                        if (value == true)
+                                          {
                                             emailCtrl.text = '',
                                             passwordCtrl.text = '',
                                             Navigator.of(context).pushNamed(
@@ -180,7 +187,10 @@ class SignInScreen extends StatelessWidget {
                                           }
                                         else
                                           {
-                                            showMyToast(context, 'Login não realizado, Email ou Password inválido', const Duration(seconds: 3))                                            
+                                            showMyToast(
+                                                context,
+                                                'Login não realizado, Email ou Password inválido',
+                                                const Duration(seconds: 3))
                                           }
                                       });
                             } else {
@@ -202,7 +212,77 @@ class SignInScreen extends StatelessWidget {
                     Align(
                       alignment: Alignment.centerRight,
                       child: TextButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return CustomModal(
+                                context: context,
+                                title: 'Esqueceu Sua Senha?',
+                                inputs: [
+                                  TextFormField(
+                                    controller: emailCtrl2,
+                                    decoration: const InputDecoration(
+                                        labelText: 'Email'),
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return 'Digite seu Email';
+                                      }
+
+                                      if (!value.contains('@')) {
+                                        return 'Digite um email válido';
+                                      }
+
+                                      return null;
+                                    },
+                                  ),
+                                ],
+                                buttons: [
+                                  ButtonConfig(name: 'OK', color: Colors.green),
+                                  ButtonConfig(
+                                      name: 'Cancelar', color: Colors.red),
+                                ],
+                                returnModalForgetPassword: (value) {
+                                  FocusScope.of(context).unfocus();
+
+                                  if (emailCtrl2.text != null) {
+                                    authController
+                                        .forgetedPassword(
+                                            email: emailCtrl2.text)
+                                        .then((value) => {
+                                              if (value == null)
+                                                {
+                                                  showMyToast(
+                                                      context,
+                                                      'Algum erro aconteceu verifique se o email foi digitado corretamente, ou entre em contato com o suporte.',
+                                                      const Duration(
+                                                          seconds: 8)),
+                                                  Future.delayed(
+                                                      Duration(seconds: 1), () {
+                                                    Navigator.pop(context);
+                                                  })
+                                                }
+                                              else
+                                                {
+                                                  print(
+                                                      '${value.runtimeType}, returned forget password api'),
+                                                  showMyToast(
+                                                      context,
+                                                      value,
+                                                      const Duration(
+                                                          seconds: 5)),
+                                                  Future.delayed(
+                                                      Duration(seconds: 1), () {
+                                                    Navigator.pop(context);
+                                                  })
+                                                }
+                                            });
+                                  }
+                                },
+                              );
+                            },
+                          );
+                        },
                         child: const Text(
                           'Esqueceu a Senha?',
                           style: TextStyle(
