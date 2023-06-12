@@ -37,7 +37,7 @@ class MenuModalIconButtons extends StatelessWidget {
             );
         selectedItem = 'camera';
         break;
-      case 'Foto':
+      case 'Imagem Galeria':
         imageVideoPhotoService.pickImageGalery().then(
               (value) => {
                 image = value.image,

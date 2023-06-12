@@ -1,12 +1,16 @@
 import 'dart:io';
 
+import 'package:classifields_apk_flutter/src/models/user_media_avatar_model.dart';
+import 'package:classifields_apk_flutter/src/models/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:classifields_apk_flutter/src/config/color_config_apk.dart';
 import 'package:classifields_apk_flutter/src/components/input_component.dart';
 import 'package:classifields_apk_flutter/src/controllers/user_controller.dart';
 import 'package:classifields_apk_flutter/src/services/image_video_photo_image_picker.dart';
 import 'package:classifields_apk_flutter/src/components/menu_modal_icon_buttons.dart';
+import 'package:classifields_apk_flutter/src/services/snack_bar_service.dart';
 
+import 'dart:convert';
 
 class Register extends StatefulWidget {
   Register({Key? key}) : super(key: key);
@@ -18,6 +22,7 @@ class Register extends StatefulWidget {
 class _RegisterState extends State<Register> {
   File? _image;
   String? _imagePath;
+  Map<String, dynamic>? userAvatar;
 
   final UserController userController = UserController();
 
@@ -51,7 +56,7 @@ class _RegisterState extends State<Register> {
     final ageDifference = currentYear - birthYear;
 
     return ageDifference;
-  }  
+  }
 
   List<dynamic>? nickNameValidator = [];
 
@@ -143,12 +148,13 @@ class _RegisterState extends State<Register> {
                                       ),
                                       builder: (BuildContext context) {
                                         return MenuModalIconButtons(
-                                          title: 'Título do Modal',
+                                          title: 'Adicione uma Foto de Perfil',
                                           icon: Icons.delete,
                                           iconsWithTitles: const [
                                             MapEntry(
                                                 Icons.camera_alt, 'Câmera'),
-                                            MapEntry(Icons.photo, 'Foto'),
+                                            MapEntry(
+                                                Icons.photo, 'Imagem Galeria'),
                                             // MapEntry(
                                             //     Icons.video_library, 'Vídeo'),
                                           ],
@@ -163,11 +169,35 @@ class _RegisterState extends State<Register> {
                                         _image = result['image'];
                                         _imagePath = result['imagePath'];
                                       });
+
+                                      String base64Image = base64Encode(
+                                          result['image'].readAsBytesSync());
+                                      String timestamp = DateTime.now()
+                                          .toUtc()
+                                          .toIso8601String();
+                                      String mimeType = 'image/jpeg';
+
+                                      Map<String, dynamic> imageObjectMap = {
+                                        'name': '$timestamp.jpeg',
+                                        'base64':
+                                            'data:image/jpeg;base64,$base64Image',
+                                        'mimeType': mimeType,
+                                      };
+
+                                      userAvatar = imageObjectMap;
+
+                                      // Use o objeto "imageObject" conforme necessário
+                                      print(
+                                          '${_image.runtimeType} , objeto image');
                                     } else {
                                       setState(() {
                                         _image = null;
                                         _imagePath = null;
                                       });
+
+                                      userAvatar = null;
+
+                                      print('${userAvatar} , objeto image');
                                     }
                                   },
                                   icon: const Icon(
@@ -303,23 +333,35 @@ class _RegisterState extends State<Register> {
                                           nickNameController.text);
 
                                   if (_formkey.currentState!.validate()) {
-                                    String realName = realNameController.text;
-                                    String nickName = nickNameController.text;
-                                    String email = emailController.text;
-                                    String birthDate = birthdateController.text;
-                                    String password = passwordController.text;
-                                    String confirmPassword =
-                                        confirmPasswordController.text;
+                                    UserModel? userJson =
+                                        UserModel.fromJson({});
 
-                                    realNameController.text = '';
-                                    nickNameController.text = '';
-                                    emailController.text = '';
-                                    birthdateController.text = '';
-                                    passwordController.text = '';
-                                    confirmPasswordController.text = '';
-
-                                    print(
-                                        '$nickName, $realName, $email, $birthDate, $password, $confirmPassword');
+                                    await userController.createUser({
+                                      'userName': nickNameController.text,
+                                      'realName': realNameController.text,
+                                      'email': emailController.text,
+                                      'birthDate': birthdateController.text,
+                                      'password': passwordController.text,
+                                      'confirmPassword':
+                                          confirmPasswordController.text,
+                                      'mediaAvatar': userAvatar
+                                    }).then((resp) => {
+                                        print('$resp, resp create'),
+                                          if(resp != null){
+                                          realNameController.text = '',
+                                          nickNameController.text = '',
+                                          emailController.text = '',
+                                          birthdateController.text = '',
+                                          passwordController.text = '',
+                                          confirmPasswordController.text = '',
+                                          setState(() {
+                                            _image = null;
+                                            _imagePath = null;
+                                          }),
+                                          }else{                                            
+                                            MySnackbar.show(context, 'Humm...Houve algum erro na criacão do usuário, tente novamente se o erro persistir entre em contato cmo suporte')
+                                          }                                         
+                                        });
                                   }
                                 },
                                 child: const Text(

@@ -35,4 +35,37 @@ class UserController {
       throw Exception('$e ,Error in create user');
     }
   }
+
+Future<dynamic> createUser(body) async {
+    try { 
+      //print('${body}, ddd');
+      //Converter o objeto em uma string JSON
+      String jsonBody = jsonEncode(body);
+
+      // Configurar o cabeçalho da requisição
+      Map<String, String> headers = {'Content-Type': 'application/json'};
+
+      //print('${jsonBody.runtimeType},$jsonBody, 777, ');
+
+      http.Response response =
+          await http.post(Uri.parse('${env.baseUrl}/user'), headers: headers.cast<String, String>() ,body: jsonBody);
+
+      
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        //print('${response.body}, 99');
+
+        final user = UserModel.fromMap(jsonDecode(response.body));
+        
+        //print('$user, ddd');
+        return user;
+
+      } else {
+        print('aconteceu um erro: ${response.statusCode}, ${response.body}');
+        return null;
+      }
+    } catch (e) {
+      print('$e ,Error in create user');
+      return null;   
+    }
+  }
 }

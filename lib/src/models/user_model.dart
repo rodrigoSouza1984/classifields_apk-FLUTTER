@@ -5,45 +5,60 @@ class UserModel {
   String? realName;
   String? userName;
   String? email;
-  String? dateOfBirth;  
+  String? dateOfBirth;
   String? token;
-  UserMediaAvatarModel? mediaAvatar; 
+  UserMediaAvatarModel? mediaAvatar;
+  String? createdAt;
+  String? updatedAt;
+  String? deletedAt;
 
-  UserModel({
-    this.id,
-    this.realName,
-    this.userName,
-    this.email,
-    this.dateOfBirth,
-    this.token,
-    this.mediaAvatar
-  });   
+  UserModel(
+      {this.id,
+      this.realName,
+      this.userName,
+      this.email,
+      this.dateOfBirth,
+      this.createdAt,
+      this.updatedAt,
+      this.deletedAt,
+      this.token,
+      this.mediaAvatar});
 
   factory UserModel.fromMap(Map<String, dynamic> map) {
     return UserModel(
-      id: map['user']['id'],
-      realName: map['user']['realName'],
-      userName: map['user']['userName'],
-      email: map['user']['email'],
-      dateOfBirth: map['user']['dateOfBirth'],
+      id: map['id'],
+      realName: map['realName'],
+      userName: map['userName'],
+      email: map['email'],
+      dateOfBirth: map['dateOfBirth'],
+      createdAt: map['createdAt'],
+      updatedAt: map['updatedAt'],
+      deletedAt: map['deletedAt'],
       token: map['access_token'],
-      mediaAvatar: UserMediaAvatarModel.fromMap(map['user']['mediaAvatar']),
+      mediaAvatar: map.containsKey('mediaAvatar')
+    ? UserMediaAvatarModel.fromMap(map['mediaAvatar'])
+    : null,
     );
   }
 
-  Map<String, dynamic> toMap() {//converte um objeto em um map
+  Map<String, dynamic> toMap() {
+    //converte um objeto em um map
     return {
       'id': id,
       'realName': realName,
       'userName': userName,
       'email': email,
       'dateOfBirth': dateOfBirth,
+      'createdAt': createdAt,
+      'updatedAt': updatedAt,
+      'deletedAt': deletedAt,
       'token': token,
       'mediaAvatar': mediaAvatar?.toMap(),
     };
   }
 
-  Map<String, dynamic> toJson() {//converte um objeto em um JSON
+  Map<String, dynamic> toJson() {
+    //converte um objeto em um JSON
     return {
       'user': {
         'id': id,
@@ -51,6 +66,9 @@ class UserModel {
         'userName': userName,
         'email': email,
         'dateOfBirth': dateOfBirth,
+        'createdAt': createdAt,
+        'updatedAt': updatedAt,
+        'deletedAt': deletedAt,
         'mediaAvatar': mediaAvatar?.toJson(),
       },
       'access_token': token,
@@ -64,6 +82,9 @@ class UserModel {
       userName: json['userName'],
       email: json['email'],
       dateOfBirth: json['dateOfBirth'],
+      createdAt: json['createdAt'],
+      updatedAt: json['updatedAt'],
+      deletedAt: json['deletedAt'],
       token: json['token'],
       mediaAvatar: json['mediaAvatar'] != null
           ? UserMediaAvatarModel.fromJson(json['mediaAvatar'])
@@ -73,6 +94,6 @@ class UserModel {
 
   @override
   String toString() {
-    return 'user: { id: $id, realName: $realName, userName: $userName, email: $email, dataOfBirth: $dateOfBirth, $mediaAvatar}, token: $token';
+    return 'user: { id: $id, realName: $realName, userName: $userName, email: $email, dataOfBirth: $dateOfBirth, createdAt: $createdAt, updatedAt: $updatedAt, deletedAt: $deletedAt, $mediaAvatar}, token: $token';
   }
 }
