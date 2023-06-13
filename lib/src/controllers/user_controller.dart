@@ -56,7 +56,7 @@ Future<dynamic> createUser(body) async {
 
         final user = UserModel.fromMap(jsonDecode(response.body));
         
-        //print('$user, ddd');
+        print('$user, ddd');
         return user;
 
       } else {

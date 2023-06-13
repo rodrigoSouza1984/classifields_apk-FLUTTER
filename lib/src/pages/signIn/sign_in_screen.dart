@@ -6,14 +6,24 @@ import 'package:classifields_apk_flutter/src/services/navigator_service_without_
 import 'package:classifields_apk_flutter/src/config/color_config_apk.dart';
 import 'package:classifields_apk_flutter/src/components/toast_message_component.dart';
 import 'package:classifields_apk_flutter/src/components/center_modal_inputs_buttons.dart';
+import 'package:classifields_apk_flutter/src/services/snack_bar_service.dart';
 
-class SignInScreen extends StatelessWidget {
+class SignInScreen extends StatefulWidget {
   SignInScreen({Key? key}) : super(key: key);
+
+  @override
+  State<SignInScreen> createState() => _SignInScreenState();
+}
+
+class _SignInScreenState extends State<SignInScreen> {
+  bool isLoading = false;
 
   final SignInController authController = SignInController();
 
   final emailCtrl = TextEditingController();
+
   final passwordCtrl = TextEditingController();
+
   final birthdateCtrl = TextEditingController();
 
   final emailCtrl2 = TextEditingController();
@@ -160,47 +170,85 @@ class SignInScreen extends StatelessWidget {
                     SizedBox(
                       height: 50,
                       child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(18)),
-                          ),
-                          onPressed: () {
-                            FocusScope.of(context).unfocus();
+                        style: ElevatedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(18)),
+                        ),
+                        onPressed: () {
+                          if (isLoading == true) {
+                            return;
+                          }
 
-                            if (_formkey.currentState!.validate()) {
-                              String email = emailCtrl.text;
-                              String password = passwordCtrl.text;
-                              print('${email}, ${password}, inputs');
+                          setState(() {
+                            isLoading = true; // Ativar o estado de carregamento
+                          });
 
-                              authController
-                                  .signIn(email: email, password: password)
-                                  .then((value) => {
-                                        print('$value, return button'),
-                                        if (value == true)
-                                          {
-                                            emailCtrl.text = '',
-                                            passwordCtrl.text = '',
+                          FocusScope.of(context).unfocus();
+
+                          if (_formkey.currentState!.validate()) {
+                            String email = emailCtrl.text;
+                            String password = passwordCtrl.text;
+                            print('${email}, ${password}, inputs');
+
+                            authController
+                                .signIn(email: email, password: password)
+                                .then((value) => {
+                                      print('$value, return button'),
+                                      if (value == true)
+                                        {
+                                          Future.delayed(
+                                              const Duration(seconds: 1), () {
+                                            MySnackbar.show(context,
+                                                'Login Realizado com Sussesso');
+                                          }),
+                                          Future.delayed(
+                                              const Duration(seconds: 2), () {
+                                            setState(() {
+                                              isLoading =
+                                                  false; // Desativar o estado de carregamento
+                                            });
+                                            emailCtrl.text = '';
+                                            passwordCtrl.text = '';
                                             Navigator.of(context).pushNamed(
                                               '/home',
                                               arguments: null,
-                                            )
-                                          }
-                                        else
-                                          {
-                                            showMyToast(
-                                                context,
-                                                'Login não realizado, Email ou Password inválido',
-                                                const Duration(seconds: 3))
-                                          }
-                                      });
-                            } else {
-                              print('Campos não válidos');
-                            }
-                          },
-                          child: const Text(
-                            'Entrar',
-                            style: TextStyle(fontSize: 18),
-                          )),
+                                            );
+                                          }),
+                                        }
+                                      else
+                                        {
+                                          showMyToast(
+                                              context,
+                                              'Login não realizado, Email ou Password inválido',
+                                              const Duration(seconds: 3)),
+                                          Future.delayed(
+                                              const Duration(seconds: 3), () {
+                                            setState(() {
+                                              isLoading =
+                                                  false; // Desativar o estado de carregamento
+                                            });
+                                          }),
+                                        }
+                                    });
+                          } else {
+                            print('Campos não válidos');
+
+                            setState(() {
+                              isLoading =
+                                  false; // Desativar o estado de carregamento
+                            });
+                          }
+                        },
+                        child: isLoading
+                            ? const CircularProgressIndicator(
+                                valueColor:
+                                    AlwaysStoppedAnimation(Colors.white),
+                              ) // Mostrar um indicador de carregamento
+                            : const Text(
+                                'Entrar',
+                                style: TextStyle(fontSize: 18),
+                              ),
+                      ),
                     ),
 
                     const SizedBox(

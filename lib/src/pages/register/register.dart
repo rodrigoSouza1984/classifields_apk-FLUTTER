@@ -23,6 +23,7 @@ class _RegisterState extends State<Register> {
   File? _image;
   String? _imagePath;
   Map<String, dynamic>? userAvatar;
+  bool isLoading = false;
 
   final UserController userController = UserController();
 
@@ -321,55 +322,101 @@ class _RegisterState extends State<Register> {
                           SizedBox(
                             height: 50,
                             child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                    shape: RoundedRectangleBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(18))),
-                                onPressed: () async {
-                                  FocusScope.of(context).unfocus();
+                              style: ElevatedButton.styleFrom(
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(18))),
+                              onPressed: () async {
+                                if (isLoading == true) {
+                                  return;
+                                }
 
-                                  nickNameValidator =
-                                      await createUserNameUnique(
-                                          nickNameController.text);
+                                setState(() {
+                                  isLoading =
+                                      true; // Ativar o estado de carregamento
+                                });
 
-                                  if (_formkey.currentState!.validate()) {
-                                    UserModel? userJson =
-                                        UserModel.fromJson({});
+                                FocusScope.of(context).unfocus();
 
-                                    await userController.createUser({
-                                      'userName': nickNameController.text,
-                                      'realName': realNameController.text,
-                                      'email': emailController.text,
-                                      'birthDate': birthdateController.text,
-                                      'password': passwordController.text,
-                                      'confirmPassword':
-                                          confirmPasswordController.text,
-                                      'mediaAvatar': userAvatar
-                                    }).then((resp) => {
-                                        print('$resp, resp create'),
-                                          if(resp != null){
-                                          realNameController.text = '',
-                                          nickNameController.text = '',
-                                          emailController.text = '',
-                                          birthdateController.text = '',
-                                          passwordController.text = '',
-                                          confirmPasswordController.text = '',
-                                          setState(() {
-                                            _image = null;
-                                            _imagePath = null;
-                                          }),
-                                          }else{                                            
-                                            MySnackbar.show(context, 'Humm...Houve algum erro na criacão do usuário, tente novamente se o erro persistir entre em contato cmo suporte')
-                                          }                                         
-                                        });
-                                  }
-                                },
-                                child: const Text(
-                                  'Cadastrar Usuário',
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                  ),
-                                )),
+                                nickNameValidator = await createUserNameUnique(
+                                    nickNameController.text);
+
+                                if (nickNameValidator!.isNotEmpty &&
+                                    nickNameValidator?[0] !=
+                                        nickNameController.text) {
+                                  setState(() {
+                                    isLoading =
+                                        false; // Desativar o estado de carregamento
+                                  });
+                                }
+
+                                if (_formkey.currentState!.validate()) {
+                                  UserModel? userJson = UserModel.fromJson({});
+
+                                  await userController.createUser({
+                                    'userName': nickNameController.text,
+                                    'realName': realNameController.text,
+                                    'email': emailController.text,
+                                    'birthDate': birthdateController.text,
+                                    'password': passwordController.text,
+                                    'confirmPassword':
+                                        confirmPasswordController.text,
+                                    'mediaAvatar': userAvatar
+                                  }).then((resp) => {
+                                        // print(
+                                        //     '$resp, resp create, ${resp != null}'),
+                                        if (resp != null)
+                                          {
+                                            realNameController.text = '',
+                                            nickNameController.text = '',
+                                            emailController.text = '',
+                                            birthdateController.text = '',
+                                            passwordController.text = '',
+                                            confirmPasswordController.text = '',
+                                            setState(() {
+                                              _image = null;
+                                              _imagePath = null;
+                                            }),
+                                            Future.delayed(
+                                                const Duration(seconds: 1), () {
+                                              MySnackbar.show(context,
+                                                  'Parabens!!! Cadastro realizado com sussesso! Realize o Login e aproveite.');
+                                            }),
+                                            Future.delayed(
+                                                const Duration(seconds: 2), () {
+                                              setState(() {
+                                                isLoading =
+                                                    false; // Desativar o estado de carregamento
+                                              });
+                                              Navigator.of(context).pushNamed(
+                                                '/login',
+                                                arguments: null,
+                                              );
+                                            }),
+                                          }
+                                        else
+                                          {
+                                            setState(() {
+                                              isLoading =
+                                                  false; // Desativar o estado de carregamento
+                                            }),
+                                            MySnackbar.show(context,
+                                                'Humm...Houve algum erro na criacão do usuário, tente novamente se o erro persistir entre em contato cmo suporte')
+                                          }
+                                      });
+                                }
+                              },
+                              child: isLoading
+                                  ? const CircularProgressIndicator(
+                                      valueColor:
+                                          AlwaysStoppedAnimation(Colors.white),
+                                    ) // Mostrar um indicador de carregamento
+                                  : const Text(
+                                      'Cadastrar Usuário',
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                      ),
+                                    ),
+                            ),
                           )
                         ],
                       ),
