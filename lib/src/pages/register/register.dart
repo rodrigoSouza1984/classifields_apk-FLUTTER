@@ -57,7 +57,7 @@ class _RegisterState extends State<Register> {
     final ageDifference = currentYear - birthYear;
 
     return ageDifference;
-  }
+  }  
 
   List<dynamic>? nickNameValidator = [];
 
@@ -219,6 +219,7 @@ class _RegisterState extends State<Register> {
                             keyboardType: TextInputType.text,
                             icon: Icons.account_circle,
                             label: 'NickName',
+                            errorText: true,                            
                             validator: (nickName) {
                               if (nickName == null || nickName.isEmpty) {
                                 return 'Escolha um nickName';
@@ -237,7 +238,7 @@ class _RegisterState extends State<Register> {
                             controller: realNameController,
                             keyboardType: TextInputType.text,
                             icon: Icons.person,
-                            label: 'Nome completo',
+                            label: 'Nome completo',                                                       
                             validator: (realName) {
                               if (realName == null || realName.isEmpty) {
                                 return 'Cadastre seu nome completo';
