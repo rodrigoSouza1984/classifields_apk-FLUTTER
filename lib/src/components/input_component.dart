@@ -35,7 +35,8 @@ class InputComponent extends StatefulWidget {
 
 class _InputComponentState extends State<InputComponent> {
   final UserController userController = UserController(); //aki
-  List<dynamic>? nickNameValidator = []; //aki
+  List<dynamic>? nickNameValidator = []; //aki3
+  bool emailExists= false;
   String errorText = '';
 
   final FormatDate formatDate = FormatDate();
@@ -103,7 +104,21 @@ class _InputComponentState extends State<InputComponent> {
             errorText = '';
           });
         }
-      } 
+      }else if(widget.label == 'Email'){
+        emailExists =
+            await userController.verifyEmailExists(widget.controller!.text);
+
+        if (emailExists == true) {
+          setState(() {
+            errorText =
+                'Email já cadastrado escolha outro para seu registro';
+          });
+        } else {
+          setState(() {
+            errorText = '';
+          });
+        }
+      }
     }
   }
 

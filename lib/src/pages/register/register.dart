@@ -251,6 +251,7 @@ class _RegisterState extends State<Register> {
                             keyboardType: TextInputType.emailAddress,
                             icon: Icons.email,
                             label: 'Email',
+                            errorText: true,
                             validator: (email) {
                               if (email == null || email.isEmpty) {
                                 return 'Digite seu Email';

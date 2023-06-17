@@ -36,6 +36,28 @@ class UserController {
     }
   }
 
+  Future<dynamic> verifyEmailExists(String email) async {
+    try {
+      
+      if(email == '' || email == null){
+        return;
+      }
+
+      http.Response response = await client.get(
+        Uri.parse('${env.baseUrl}/user/verifyEmailExists/$email'),
+      );
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        final validate = jsonDecode(response.body);
+        return validate;
+      } else {
+        print('aconteceu um erro: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('$e ,Error in create user');
+    }
+  }
+
 Future<dynamic> createUser(body) async {
     try { 
       //print('${body}, ddd');
