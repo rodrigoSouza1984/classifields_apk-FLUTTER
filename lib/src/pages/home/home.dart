@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:classifields_apk_flutter/src/config/color_config_apk.dart';
 import 'package:classifields_apk_flutter/src/controllers/sign_in_controller.dart';
 
-
+import 'package:classifields_apk_flutter/src/components/menu_component_widget.dart';
 
 class Home extends StatelessWidget {
-  Home({Key? key}) : super(key: key);  
+  Home({Key? key}) : super(key: key);
 
   final SignInController authController = SignInController();
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -36,26 +36,13 @@ class Home extends StatelessWidget {
               ),
             ],
           ),
-        ),
-        leading: IconButton(
-          onPressed: () {
-            // Lógica do botão da esquerda
+        ),        
+      ),      
+      endDrawer: MenuComponentWidget( // Define o endDrawer para um menu lateral no lado direito
+          onItemSelected: (value) {
+            print('$value, 9999');
           },
-          icon: const Icon(Icons.menu),
-          color: Colors.white,
         ),
-        actions: [
-          IconButton(
-            onPressed: () {
-              authController.logout().then((value) => {			
-                    Navigator.of(context).pop()
-                  });
-            },
-            icon: const Icon(Icons.logout),
-            color: Colors.white,
-          )
-        ],
-      ),
     );
   }
 }
