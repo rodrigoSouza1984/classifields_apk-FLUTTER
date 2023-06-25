@@ -36,13 +36,15 @@ class Home extends StatelessWidget {
               ),
             ],
           ),
-        ),        
-      ),      
-      endDrawer: MenuComponentWidget( // Define o endDrawer para um menu lateral no lado direito
-          onItemSelected: (value) {
-            print('$value, 9999');
-          },
         ),
+      ),
+      endDrawer: MenuComponentWidget(
+        // Define o endDrawer para um menu lateral no lado direito
+        pageCallThisComponent: 'home',
+        onItemSelected: (value) {
+          print('$value, 9999');
+        },
+      ),
     );
   }
 }

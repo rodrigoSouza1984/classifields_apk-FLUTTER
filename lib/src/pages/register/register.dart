@@ -358,7 +358,7 @@ class _RegisterState extends State<Register> {
                                     'userName': nickNameController.text,
                                     'realName': realNameController.text,
                                     'email': emailController.text,
-                                    'birthDate': birthdateController.text,
+                                    'dateOfBirth': birthdateController.text,
                                     'password': passwordController.text,
                                     'confirmPassword':
                                         confirmPasswordController.text,

@@ -23,9 +23,9 @@ class SignInController {
           await http.post(Uri.parse('${env.baseUrl}/user/login'), body: body);
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
-        print('${response.body}, return api');
+        print('${response.body}, return api');       
 
-        final user = UserModel.fromMap(jsonDecode(response.body));
+        final user = UserModel.fromMap(jsonDecode(response.body));       
 
         //Salvar o token
         bool saveSuccessful = await storageService.saveLocalObject(
@@ -36,11 +36,16 @@ class SignInController {
           print('Objeto salvo com sucessoooo!');
 
           //pegando os dados salvos no storage
-          String? localData =
+          String? localDataReturned =
               await storageService.getLocalData(key: ConstantsApk.userLogado);
 
+          final localData = jsonDecode(localDataReturned!);
+
+          print('${localData['user']}, testando aki');
+
           if (localData != null) {
-            UserModel user = UserModel.fromMap(jsonDecode(localData));
+            
+            UserModel user = UserModel.fromMap(localData['user']);
 
             // Imprime o objeto User logado
             print('Objeto User Logado: ${user.realName}');
@@ -161,7 +166,6 @@ class SignInController {
       throw Exception('$err ,Error in create user');
     }
   }
-
 
   Future<dynamic> forgetedPassword({required String email}) async {
     try {       

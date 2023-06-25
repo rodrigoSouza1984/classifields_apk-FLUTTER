@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:ffi';
 
 import 'package:http/http.dart' as http;
 import 'package:classifields_apk_flutter/src/enviroments/enviroments.dart';
@@ -7,7 +8,6 @@ import 'package:classifields_apk_flutter/src/services/storage_service.dart';
 import 'package:classifields_apk_flutter/src/services/logging_interceptor.dart';
 
 class UserController {
-  
   final env = Environments();
 
   final client = LoggingInterceptor();
@@ -16,8 +16,7 @@ class UserController {
 
   Future<dynamic> createUserNameUnique(String userName) async {
     try {
-      
-      if(userName == '' || userName == null){
+      if (userName == '' || userName == null) {
         return;
       }
 
@@ -38,8 +37,7 @@ class UserController {
 
   Future<dynamic> verifyEmailExists(String email) async {
     try {
-      
-      if(email == '' || email == null){
+      if (email == '' || email == null) {
         return;
       }
 
@@ -58,36 +56,61 @@ class UserController {
     }
   }
 
-Future<dynamic> createUser(body) async {
-    try { 
-      //print('${body}, ddd');
-      //Converter o objeto em uma string JSON
+  Future<dynamic> createUser(body) async {
+    try {
       String jsonBody = jsonEncode(body);
 
-      // Configurar o cabeçalho da requisição
       Map<String, String> headers = {'Content-Type': 'application/json'};
 
-      //print('${jsonBody.runtimeType},$jsonBody, 777, ');
+      http.Response response = await http.post(Uri.parse('${env.baseUrl}/user'),
+          headers: headers.cast<String, String>(), body: jsonBody);
 
-      http.Response response =
-          await http.post(Uri.parse('${env.baseUrl}/user'), headers: headers.cast<String, String>() ,body: jsonBody);
-
-      
       if (response.statusCode >= 200 && response.statusCode < 300) {
-        //print('${response.body}, 99');
-
         final user = UserModel.fromMap(jsonDecode(response.body));
-        
-        print('$user, ddd');
-        return user;
 
+        return user;
       } else {
         print('aconteceu um erro: ${response.statusCode}, ${response.body}');
         return null;
       }
     } catch (e) {
       print('$e ,Error in create user');
-      return null;   
+      return null;
     }
   }
+
+  Future<dynamic> getUserById(int? userId) async {
+    try {
+      String? token = '';     
+
+      String? localDataReturned =
+          await storageService.getLocalData(key: ConstantsApk.userLogado);
+
+      final localData = jsonDecode(localDataReturned!);
+
+      if (localData != null) {
+        UserModel user = UserModel.fromMap(localData['user']);
+        token = user.token;        
+      }
+
+      Map<String, String> headers = {
+        'Authorization': 'Bearer $token',
+      };
+
+      http.Response response = await client
+          .get(Uri.parse('${env.baseUrl}/user/$userId'), headers: headers);
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        UserModel user = UserModel.fromMap(jsonDecode(response.body));
+        return user;
+      } else {
+        print('aconteceu um erro: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('$e ,Error in create user');
+    }
+  }
+
 }
+
+

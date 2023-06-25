@@ -7,6 +7,7 @@ class UserModel {
   String? email;
   String? dateOfBirth;
   String? token;
+  String? typePermissionEnum;
   UserMediaAvatarModel? mediaAvatar;
   String? createdAt;
   String? updatedAt;
@@ -18,6 +19,7 @@ class UserModel {
       this.userName,
       this.email,
       this.dateOfBirth,
+      this.typePermissionEnum,
       this.createdAt,
       this.updatedAt,
       this.deletedAt,
@@ -25,21 +27,28 @@ class UserModel {
       this.mediaAvatar});
 
   factory UserModel.fromMap(Map<String, dynamic> map) {
-    return UserModel(
-      id: map['id'],
-      realName: map['realName'],
-      userName: map['userName'],
-      email: map['email'],
-      dateOfBirth: map['dateOfBirth'],
-      createdAt: map['createdAt'],
-      updatedAt: map['updatedAt'],
-      deletedAt: map['deletedAt'],
-      token: map['access_token'],
-      mediaAvatar: map.containsKey('mediaAvatar')
-    ? UserMediaAvatarModel.fromMap(map['mediaAvatar'])
-    : null,
-    );
-  }
+    try {
+      return UserModel(
+        id: map['id'],
+        realName: map['realName'],
+        userName: map['userName'],
+        email: map['email'],
+        dateOfBirth: map['dateOfBirth'] ?? 'N/A',
+        typePermissionEnum: map['typePermissionEnum'],
+        createdAt: map['createdAt'],
+        updatedAt: map['updatedAt'],
+        deletedAt: map['deletedAt'],
+        token: map['token'],
+        mediaAvatar:
+            map.containsKey('mediaAvatar') && map['mediaAvatar'] != null
+                ? UserMediaAvatarModel.fromMap(map['mediaAvatar'])
+                : null,
+      );
+    } catch (e) {
+      print('Erro ao criar UserModel a partir do mapa: $e');
+      throw Exception('Erro ao criar UserModel a partir do mapa');
+    }
+  }  
 
   Map<String, dynamic> toMap() {
     //converte um objeto em um map
@@ -49,6 +58,7 @@ class UserModel {
       'userName': userName,
       'email': email,
       'dateOfBirth': dateOfBirth,
+      'typePermissionEnum': typePermissionEnum,
       'createdAt': createdAt,
       'updatedAt': updatedAt,
       'deletedAt': deletedAt,
@@ -58,7 +68,8 @@ class UserModel {
   }
 
   Map<String, dynamic> toJson() {
-    //converte um objeto em um JSON
+    //converte um objeto em um JSON    
+    try{
     return {
       'user': {
         'id': id,
@@ -66,13 +77,18 @@ class UserModel {
         'userName': userName,
         'email': email,
         'dateOfBirth': dateOfBirth,
+        'typePermissionEnum': typePermissionEnum,
         'createdAt': createdAt,
         'updatedAt': updatedAt,
         'deletedAt': deletedAt,
         'mediaAvatar': mediaAvatar?.toJson(),
-      },
-      'access_token': token,
+        'token': token,
+      },      
     };
+    } catch (e) {
+      print('Erro ao criar UserModel a partir do mapa: $e');
+      throw Exception('Erro ao criar UserModel a partir do mapa');
+    }
   }
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -82,6 +98,7 @@ class UserModel {
       userName: json['userName'],
       email: json['email'],
       dateOfBirth: json['dateOfBirth'],
+      typePermissionEnum: json['typePermissionEnum'],
       createdAt: json['createdAt'],
       updatedAt: json['updatedAt'],
       deletedAt: json['deletedAt'],
@@ -94,6 +111,6 @@ class UserModel {
 
   @override
   String toString() {
-    return 'user: { id: $id, realName: $realName, userName: $userName, email: $email, dataOfBirth: $dateOfBirth, createdAt: $createdAt, updatedAt: $updatedAt, deletedAt: $deletedAt, $mediaAvatar}, token: $token';
+    return '{ id: $id, realName: $realName, userName: $userName, email: $email, dataOfBirth: $dateOfBirth, typePermissionEnum: $typePermissionEnum createdAt: $createdAt, updatedAt: $updatedAt, deletedAt: $deletedAt, $mediaAvatar, token: $token}';
   }
 }
