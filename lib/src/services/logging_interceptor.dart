@@ -8,9 +8,11 @@ class LoggingInterceptor extends http.BaseClient {
   final SignInController authController = SignInController();
 
   @override
-  Future<http.StreamedResponse> send(http.BaseRequest request) async {
+  Future<http.StreamedResponse> send(http.BaseRequest request) async {    
     final response = await _httpClient.send(request);
-    print('${response.statusCode}, response.statusCode');
+    
+    print('${response.statusCode}, response.statusCode interceptor.dart');
+
     if (response.statusCode == 401) {
       final newToken = await authController.refreshToken();
       final updatedRequest = http.Request(request.method, request.url);

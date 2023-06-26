@@ -3,10 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:classifields_apk_flutter/src/controllers/sign_in_controller.dart';
 import 'package:classifields_apk_flutter/src/controllers/user_controller.dart';
 
-import 'package:classifields_apk_flutter/src/services/storage_service.dart';
-import 'package:classifields_apk_flutter/src/enviroments/enviroments.dart';
-import 'dart:convert';
-
 class MenuItem {
   final String name;
   final IconData icon;
@@ -28,14 +24,9 @@ class MenuComponentWidget extends StatefulWidget {
 class _MenuComponentWidgetState extends State<MenuComponentWidget> {
   final ValueNotifier<String?> _selectedValue = ValueNotifier<String?>(null);
   final SignInController authController = SignInController();
-  final UserController userController = UserController();
+  final UserController userController = UserController();  
+  UserModel user = UserModel();  
 
-  final storageService = StorageService();
-  UserModel user = UserModel();
-  String? localDataReturned = '';
-  dynamic localData;
-  UserModel userLocal = UserModel();
-  UserModel userLocalDataVar = UserModel();
 
   List<MenuItem> listFullItems = [
     MenuItem(name: 'Dados Cadastrais', icon: Icons.perm_identity),
@@ -47,11 +38,17 @@ class _MenuComponentWidgetState extends State<MenuComponentWidget> {
   List<MenuItem> listWithFilterShowMenu = [];
 
   @override
-  void initState() {
+  initState() {
     super.initState();
+    
+    getLocalUser();
+  }  
 
-    userLocalData().then((v) {
-      userController.getUserById(userLocalDataVar.id).then((value) async => {
+  getLocalUser()async{
+      final userLocal = await userController.userLocalData();      
+
+      if(userLocal != null){
+        await userController.getUserById(userLocal.id).then((value) async => {
             setState(() {
               user = value;
             }),
@@ -60,20 +57,10 @@ class _MenuComponentWidgetState extends State<MenuComponentWidget> {
                 addItemsFilteredsToList(),
               },
           });
-    });
-  }
-
-  userLocalData() async {
-    localDataReturned =
-        await storageService.getLocalData(key: ConstantsApk.userLogado);
-    localData = jsonDecode(localDataReturned!);
-    if (localData != null) {
-      userLocal = UserModel.fromMap(localData['user']);
-      setState(() {
-        userLocalDataVar = userLocal;
-      });
+      }else{
+        print('erro aki karalho $userLocal');
+      }      
     }
-  }
 
   void addItemsFilteredsToList() {   
     listWithFilterShowMenu.add(listFullItems[

@@ -1,6 +1,4 @@
 import 'dart:convert';
-import 'dart:ffi';
-
 import 'package:http/http.dart' as http;
 import 'package:classifields_apk_flutter/src/enviroments/enviroments.dart';
 import 'package:classifields_apk_flutter/src/models/user_model.dart';
@@ -81,17 +79,11 @@ class UserController {
 
   Future<dynamic> getUserById(int? userId) async {
     try {
-      String? token = '';     
+      String? token = '';      
 
-      String? localDataReturned =
-          await storageService.getLocalData(key: ConstantsApk.userLogado);
-
-      final localData = jsonDecode(localDataReturned!);
-
-      if (localData != null) {
-        UserModel user = UserModel.fromMap(localData['user']);
-        token = user.token;        
-      }
+      await userLocalData().then((value) => {
+        token =  value.token
+      });      
 
       Map<String, String> headers = {
         'Authorization': 'Bearer $token',
@@ -111,6 +103,18 @@ class UserController {
     }
   }
 
+  Future userLocalData() async {
+    try {
+      final localDataReturned =
+          await storageService.getLocalData(key: ConstantsApk.userLogado);
+      final localData = jsonDecode(localDataReturned!);
+
+      if (localData != null) {
+        return UserModel.fromMap(localData['user']);
+      }
+    } catch (err) {
+      print('aconteceu um erro: $err');
+      throw Exception('$err ,Error in create user');
+    }
+  }
 }
-
-

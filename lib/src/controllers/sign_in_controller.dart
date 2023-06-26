@@ -1,21 +1,22 @@
 import 'dart:convert';
-
 import 'package:http/http.dart' as http;
 import 'package:classifields_apk_flutter/src/enviroments/enviroments.dart';
 import 'package:classifields_apk_flutter/src/models/user_model.dart';
 import 'package:classifields_apk_flutter/src/services/storage_service.dart';
 import 'package:classifields_apk_flutter/src/services/logging_interceptor.dart';
-
-import 'package:classifields_apk_flutter/src/components/toast_message_component.dart';
+import 'package:classifields_apk_flutter/src/controllers/user_controller.dart';
 
 final env = Environments();
 
 final client = LoggingInterceptor();
 
+final UserController userController = UserController();
+
 class SignInController {
   final storageService = StorageService();
 
-  Future<dynamic> signIn({required String email, required String password}) async {
+  Future<dynamic> signIn(
+      {required String email, required String password}) async {
     try {
       Map<String, dynamic> body = {'email': email, 'password': password};
 
@@ -23,36 +24,24 @@ class SignInController {
           await http.post(Uri.parse('${env.baseUrl}/user/login'), body: body);
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
-        print('${response.body}, return api');       
+        print('${response.body}, return api');
 
-        final user = UserModel.fromMap(jsonDecode(response.body));       
+        final user = UserModel.fromMap(jsonDecode(response.body));
 
         //Salvar o token
         bool saveSuccessful = await storageService.saveLocalObject(
             key: ConstantsApk.userLogado, data: user);
 
         if (saveSuccessful) {
-          // O objeto foi salvo com sucesso
-          print('Objeto salvo com sucessoooo!');
+          final userLocal = await userController.userLocalData();
 
-          //pegando os dados salvos no storage
-          String? localDataReturned =
-              await storageService.getLocalData(key: ConstantsApk.userLogado);
+          if (userLocal != null) {							//=> AKI ADD
+              // Imprime o objeto User logado
+              print('Objeto User Logado: ${userLocal.realName}');
 
-          final localData = jsonDecode(localDataReturned!);
+              print('Objeto User Logado: ${userLocal}');
 
-          print('${localData['user']}, testando aki');
-
-          if (localData != null) {
-            
-            UserModel user = UserModel.fromMap(localData['user']);
-
-            // Imprime o objeto User logado
-            print('Objeto User Logado: ${user.realName}');
-
-            print('Objeto User Logado: ${user}');
-
-            return true;
+              return true;
           }
         }
       } else {
@@ -67,23 +56,19 @@ class SignInController {
   Future<dynamic> validateToken() async {
     try {
       String? token = '';      
+      final userLocal = await userController.userLocalData();
 
-      String? localData =
-          await storageService.getLocalData(key: ConstantsApk.userLogado);
-
-      if (localData != null) {
-        UserModel user = UserModel.fromMap(jsonDecode(localData));
-
-        token = user.token;
-      }     
+      if (userLocal != null) {
+        token = userLocal.token;
+      }
 
       Map<String, String> headers = {
         'Authorization': 'Bearer $token',
-      };      
+      };
 
       http.Response response = await client.get(
           Uri.parse('${env.baseUrl}/user/token/validateToken'),
-          headers: headers);          
+          headers: headers);
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
         final validate = response.body;
@@ -103,28 +88,22 @@ class SignInController {
 
   Future<dynamic> refreshToken() async {
     try {
-      String? token = '';
+      String? token = '';      
 
-      String? localData =
-          await storageService.getLocalData(key: ConstantsApk.userLogado);
+      final userLocal = await userController.userLocalData();
 
-      if (localData != null) {
-        UserModel user = UserModel.fromMap(jsonDecode(localData));
-
-        token = user.token;
+      if (userLocal != null) {
+        token = userLocal.token;
       }
 
       Map<String, dynamic> body = {'oldToken': token};
 
-      await logout();      
+      await logout();
 
       http.Response response = await http
           .post(Uri.parse('${env.baseUrl}/token/refreshToken'), body: body);
-
-      print('${response.statusCode} controller');
+      
       if (response.statusCode >= 200 && response.statusCode < 300) {
-        print('${response.body}, return refresh token');
-
         final user = UserModel.fromMap(jsonDecode(response.body));
 
         //Salvar o token
@@ -138,16 +117,13 @@ class SignInController {
           // Imprime o objeto User logado
           print('Objeto User Logado: ${user.token}, refresh');
 
-          print('Objeto User Logado: ${user}, refresh');
+          print('Objeto User Logado: ${user}, refresh');          
 
-          String? localData =
-              await storageService.getLocalData(key: ConstantsApk.userLogado);
+          final userLocal = await userController.userLocalData();
 
-          if (localData != null) {
-            UserModel user = UserModel.fromMap(jsonDecode(localData));
-
-            return user.token;
-          }
+          if (userLocal != null) {
+            return userLocal.token;
+          }          
         }
       } else {
         print('aconteceu um erro: ${response.statusCode}');
@@ -168,26 +144,24 @@ class SignInController {
   }
 
   Future<dynamic> forgetedPassword({required String email}) async {
-    try {       
-
+    try {
       Map<String, dynamic> body = {'email': email};
 
-      await logout();      
+      await logout();
 
-      http.Response response = await http
-          .post(Uri.parse('${env.baseUrl}/user/forgetedOrUpdatePassword'), body: body);
+      http.Response response = await http.post(
+          Uri.parse('${env.baseUrl}/user/forgetedOrUpdatePassword'),
+          body: body);
 
       print('${response.statusCode} controller');
       if (response.statusCode >= 200 && response.statusCode < 300) {
-
         Map<String, dynamic> responseJson = json.decode(response.body);
 
-        print('${responseJson}, forgeted password, ${responseJson['message']}'); 
+        print('${responseJson}, forgeted password, ${responseJson['message']}');
 
-        String message = responseJson['message'];        
+        String message = responseJson['message'];
 
-        return message; 
-
+        return message;
       } else {
         print('aconteceu um erro: ${response.statusCode}');
         return null;
@@ -196,5 +170,4 @@ class SignInController {
       throw Exception('Error in create user');
     }
   }
-
 }
