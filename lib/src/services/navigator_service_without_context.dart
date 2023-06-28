@@ -9,7 +9,12 @@ class NavigationService {
   }
 
   static Future<T?> pushNamed<T extends Object?>(String routeName, {Object? arguments}) async {
-    return await navigatorKey.currentState?.pushNamed(routeName, arguments: arguments);
+    try{     
+      return await navigatorKey.currentState?.pushNamed(routeName, arguments: arguments);
+    }catch(err){
+      print('erro pushname, $err');
+    }
+    
   }
 
   static void pushNamedAndRemoveUntil(String newRouteName) {

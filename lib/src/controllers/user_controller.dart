@@ -79,11 +79,9 @@ class UserController {
 
   Future<dynamic> getUserById(int? userId) async {
     try {
-      String? token = '';      
+      String? token = '';
 
-      await userLocalData().then((value) => {
-        token =  value.token
-      });      
+      await userLocalData().then((value) => {token = value.token});
 
       Map<String, String> headers = {
         'Authorization': 'Bearer $token',
@@ -107,13 +105,18 @@ class UserController {
     try {
       final localDataReturned =
           await storageService.getLocalData(key: ConstantsApk.userLogado);
-      final localData = jsonDecode(localDataReturned!);
 
-      if (localData != null) {
-        return UserModel.fromMap(localData['user']);
+      if (localDataReturned != null) {
+        final localData = jsonDecode(localDataReturned);        
+
+        if (localData != null) {
+          return UserModel.fromMap(localData['user']);
+        } else {
+          return null;
+        }
       }
     } catch (err) {
-      print('aconteceu um erro: $err');
+      print('aconteceu um erro: $err, userLocalData');
       throw Exception('$err ,Error in create user');
     }
   }

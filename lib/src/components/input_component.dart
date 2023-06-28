@@ -12,7 +12,7 @@ class InputComponent extends StatefulWidget {
   final bool errorText; //aki
   final TextInputType? keyboardType;
   final TextEditingController? controller;
-  final String? Function(String?)? validator;
+  final String? Function(String?)? validator;  
 
   bool isObscure = false; //don't need receive by constructor
 
@@ -26,7 +26,7 @@ class InputComponent extends StatefulWidget {
     this.isSecret = false,
     this.errorText = false,
     this.controller,
-    this.validator,
+    this.validator,    
   }) : super(key: key);
 
   @override
@@ -136,7 +136,7 @@ class _InputComponentState extends State<InputComponent> {
           }
         },
         obscureText: isObscure,
-        //keyboardType: widget.keyboardType,
+        //keyboardType: widget.keyboardType,        
         readOnly: widget.readOnly,
         focusNode: _focusNode,
         validator: widget.validator,

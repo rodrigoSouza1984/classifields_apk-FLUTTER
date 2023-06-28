@@ -2,6 +2,7 @@ import 'package:classifields_apk_flutter/src/models/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:classifields_apk_flutter/src/controllers/sign_in_controller.dart';
 import 'package:classifields_apk_flutter/src/controllers/user_controller.dart';
+import 'package:classifields_apk_flutter/src/services/navigator_service_without_context.dart';
 
 class MenuItem {
   final String name;
@@ -118,9 +119,9 @@ class _MenuComponentWidgetState extends State<MenuComponentWidget> {
                   return ListTile(
                     title: Text(listWithFilterShowMenu[index].name),
                     leading: Icon(listWithFilterShowMenu[index].icon),
-                    onTap: () {
-                      _handleItemSelected(listWithFilterShowMenu[index].name);
+                    onTap: () {                      
                       Navigator.pop(context); // Fechar o menu após a seleção
+                      _handleItemSelected(listWithFilterShowMenu[index].name);
                     },
                   );
                 },
@@ -133,21 +134,22 @@ class _MenuComponentWidgetState extends State<MenuComponentWidget> {
   }
 
   void _handleItemSelected(String value) async {
-    _selectedValue.value = value;
+    try{
+      _selectedValue.value = value;
     if (value == 'Logout') {
-      authController.logout().then((value) {
-        print('$value, logout');
-        Navigator.of(context).pop();
-      });
+      authController.logout();
     } else if (value == 'Dados Cadastrais') {
-      print('Dados Cadastrais clicado');
-      //await userController.getUserById();
+      print('Dados Cadastrais clicado');      
+      NavigationService.pushNamed('/register', arguments: user);      
     } else if (value == 'Usuários Cadastrados') {
       print('Item 2 clicado');
     } else if (value == 'Item 3') {
       print('Item 3 clicado');
     }
     widget.onItemSelected(value);
+    }catch(e){
+      print('teste erro aki , $e');
+    }    
   }
 
   @override

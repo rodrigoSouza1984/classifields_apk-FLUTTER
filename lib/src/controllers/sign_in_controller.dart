@@ -5,6 +5,7 @@ import 'package:classifields_apk_flutter/src/models/user_model.dart';
 import 'package:classifields_apk_flutter/src/services/storage_service.dart';
 import 'package:classifields_apk_flutter/src/services/logging_interceptor.dart';
 import 'package:classifields_apk_flutter/src/controllers/user_controller.dart';
+import 'package:classifields_apk_flutter/src/services/navigator_service_without_context.dart';
 
 final env = Environments();
 
@@ -45,7 +46,7 @@ class SignInController {
           }
         }
       } else {
-        print('aconteceu um erro: ${response.statusCode}');
+        print('aconteceu um erro: ${response.statusCode}, login metodo signIn');
         return false;
       }
     } catch (e) {
@@ -79,7 +80,7 @@ class SignInController {
           return true;
         }
       } else {
-        print('aconteceu um erro: ${response.statusCode}');
+        print('aconteceu um erro: ${response.statusCode}, ValidateToken');
       }
     } catch (e) {
       throw Exception('$e ,Error in create user');
@@ -126,7 +127,7 @@ class SignInController {
           }          
         }
       } else {
-        print('aconteceu um erro: ${response.statusCode}');
+        print('aconteceu um erro: ${response.statusCode}, refresh token');
       }
     } catch (e) {
       throw Exception('Error in create user');
@@ -135,8 +136,7 @@ class SignInController {
 
   Future<dynamic> logout() async {
     try {
-      storageService.removeLocalData(key: ConstantsApk.userLogado);
-
+      storageService.removeLocalData(key: ConstantsApk.userLogado).then((value) => NavigationService.pushNamed('/login'));
       return true;
     } catch (err) {
       throw Exception('$err ,Error in create user');
@@ -163,7 +163,7 @@ class SignInController {
 
         return message;
       } else {
-        print('aconteceu um erro: ${response.statusCode}');
+        print('aconteceu um erro: ${response.statusCode}, forget password');
         return null;
       }
     } catch (e) {

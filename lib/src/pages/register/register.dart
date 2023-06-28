@@ -1,6 +1,4 @@
 import 'dart:io';
-
-import 'package:classifields_apk_flutter/src/models/user_media_avatar_model.dart';
 import 'package:classifields_apk_flutter/src/models/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:classifields_apk_flutter/src/config/color_config_apk.dart';
@@ -12,8 +10,11 @@ import 'package:classifields_apk_flutter/src/services/snack_bar_service.dart';
 
 import 'dart:convert';
 
-class Register extends StatefulWidget {
-  Register({Key? key}) : super(key: key);
+class Register extends StatefulWidget { 
+
+  Register({
+    Key? key,    
+  }) : super(key: key);
 
   @override
   State<Register> createState() => _RegisterState();
@@ -28,6 +29,10 @@ class _RegisterState extends State<Register> {
   final UserController userController = UserController();
 
   final imageVideoPhotoService = ImageVideoPhotoService();
+
+  UserModel? user;
+  bool isUpdate = false;
+  bool isUpdateImage = false;  
 
   bool validarSenha(String password) {
     RegExp regex = RegExp(r'^(?=.*[0-9])(?=.*[\W_]).{7,}$');
@@ -57,25 +62,45 @@ class _RegisterState extends State<Register> {
     final ageDifference = currentYear - birthYear;
 
     return ageDifference;
-  }  
+  }
 
   List<dynamic>? nickNameValidator = [];
 
-  final birthdateController = TextEditingController();
+  var birthdateController = TextEditingController();
 
-  final nickNameController = TextEditingController();
+  var nickNameController = TextEditingController();
 
-  final realNameController = TextEditingController();
+  var realNameController = TextEditingController();
 
-  final emailController = TextEditingController();
+  var emailController = TextEditingController();
 
-  final bithDateController = TextEditingController();
+  var bithDateController = TextEditingController();
 
-  final passwordController = TextEditingController();
+  var passwordController = TextEditingController();
 
-  final confirmPasswordController = TextEditingController();
+  var confirmPasswordController = TextEditingController();
 
-  final _formkey = GlobalKey<FormState>();
+  var _formkey = GlobalKey<FormState>();  
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    user = ModalRoute.of(context)?.settings.arguments as UserModel?;
+
+    print('$user, useraki');
+
+    if(user != null){
+      setState(() {
+        isUpdate = true;
+        isUpdateImage = true;
+
+        nickNameController = TextEditingController(text: user?.userName);
+        realNameController = TextEditingController(text: user?.realName);
+        emailController = TextEditingController(text: user?.email);
+        birthdateController = TextEditingController(text: user?.dateOfBirth);
+      });      
+    }    
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -92,12 +117,28 @@ class _RegisterState extends State<Register> {
               Column(
                 children: [
                   //TITULO DA TELA
+                  !isUpdate ?
                   const Expanded(
                     child: Padding(
                       padding: EdgeInsets.only(top: 60),
                       child: Center(
                         child: Text(
                           'Cadastro',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 35,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ) 
+                  : 
+                  const Expanded(
+                    child: Padding(
+                      padding: EdgeInsets.only(top: 60),
+                      child: Center(
+                        child: Text(
+                          'Dados Do Usuário',
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 35,
@@ -124,8 +165,18 @@ class _RegisterState extends State<Register> {
                           // Avatar
                           Stack(
                             alignment: Alignment.center,
-                            children: [
+                            children: [    
+                              isUpdateImage ?                          
                               CircleAvatar(
+                                radius: 50,
+                                backgroundColor: Colors.grey,
+                                backgroundImage: user?.mediaAvatar?.url != null
+                                    ? NetworkImage(user!.mediaAvatar!.url!)
+                                    : const Image(
+                                        image: AssetImage(
+                                            'assets/images/avatarzinho.jpg'),
+                                      ).image as ImageProvider<Object>?,
+                              ) : CircleAvatar(
                                 radius: 50,
                                 backgroundColor: Colors.grey,
                                 backgroundImage: _imagePath != null
@@ -169,6 +220,8 @@ class _RegisterState extends State<Register> {
                                       setState(() {
                                         _image = result['image'];
                                         _imagePath = result['imagePath'];
+
+                                        isUpdateImage = false;
                                       });
 
                                       String base64Image = base64Encode(
@@ -215,11 +268,11 @@ class _RegisterState extends State<Register> {
                           ),
 
                           InputComponent(
-                            controller: nickNameController,
+                            controller:  nickNameController,                            
                             keyboardType: TextInputType.text,
                             icon: Icons.account_circle,
                             label: 'NickName',
-                            errorText: true,                            
+                            errorText: true,
                             validator: (nickName) {
                               if (nickName == null || nickName.isEmpty) {
                                 return 'Escolha um nickName';
@@ -235,10 +288,10 @@ class _RegisterState extends State<Register> {
                             },
                           ),
                           InputComponent(
-                            controller: realNameController,
+                            controller: realNameController,                            
                             keyboardType: TextInputType.text,
                             icon: Icons.person,
-                            label: 'Nome completo',                                                       
+                            label: 'Nome completo',
                             validator: (realName) {
                               if (realName == null || realName.isEmpty) {
                                 return 'Cadastre seu nome completo';
@@ -283,6 +336,7 @@ class _RegisterState extends State<Register> {
                               return null;
                             },
                           ),
+                          if(!isUpdate)
                           InputComponent(
                             controller: passwordController,
                             keyboardType: TextInputType.visiblePassword,
@@ -301,6 +355,7 @@ class _RegisterState extends State<Register> {
                               return null;
                             },
                           ),
+                          if(!isUpdate)
                           InputComponent(
                             controller: confirmPasswordController,
                             keyboardType: TextInputType.visiblePassword,
@@ -323,7 +378,8 @@ class _RegisterState extends State<Register> {
                           ),
                           SizedBox(
                             height: 50,
-                            child: ElevatedButton(
+                            
+                            child: !isUpdate ? ElevatedButton(
                               style: ElevatedButton.styleFrom(
                                   shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(18))),
@@ -414,6 +470,101 @@ class _RegisterState extends State<Register> {
                                     ) // Mostrar um indicador de carregamento
                                   : const Text(
                                       'Cadastrar Usuário',
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                      ),
+                                    ),
+                            ) : ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(18))),
+                              onPressed: () async {
+                                if (isLoading == true) {
+                                  return;
+                                }
+
+                                setState(() {
+                                  isLoading =
+                                      true; // Ativar o estado de carregamento
+                                });
+
+                                FocusScope.of(context).unfocus();
+
+                                nickNameValidator = await createUserNameUnique(
+                                    nickNameController.text);
+
+                                if (nickNameValidator!.isNotEmpty &&
+                                    nickNameValidator?[0] !=
+                                        nickNameController.text) {
+                                  setState(() {
+                                    isLoading =
+                                        false; // Desativar o estado de carregamento
+                                  });
+                                }
+
+                                if (_formkey.currentState!.validate()) {
+                                  UserModel? userJson = UserModel.fromJson({});
+
+                                  // await userController.createUser({
+                                  //   'userName': nickNameController.text,
+                                  //   'realName': realNameController.text,
+                                  //   'email': emailController.text,
+                                  //   'dateOfBirth': birthdateController.text,
+                                  //   'password': passwordController.text,
+                                  //   'confirmPassword':
+                                  //       confirmPasswordController.text,
+                                  //   'mediaAvatar': userAvatar
+                                  // }).then((resp) => {
+                                  //       // print(
+                                  //       //     '$resp, resp create, ${resp != null}'),
+                                  //       if (resp != null)
+                                  //         {
+                                  //           realNameController.text = '',
+                                  //           nickNameController.text = '',
+                                  //           emailController.text = '',
+                                  //           birthdateController.text = '',
+                                  //           passwordController.text = '',
+                                  //           confirmPasswordController.text = '',
+                                  //           setState(() {
+                                  //             _image = null;
+                                  //             _imagePath = null;
+                                  //           }),
+                                  //           Future.delayed(
+                                  //               const Duration(seconds: 1), () {
+                                  //             MySnackbar.show(context,
+                                  //                 'Parabens!!! Cadastro realizado com sussesso! Realize o Login e aproveite.');
+                                  //           }),
+                                  //           Future.delayed(
+                                  //               const Duration(seconds: 2), () {
+                                  //             setState(() {
+                                  //               isLoading =
+                                  //                   false; // Desativar o estado de carregamento
+                                  //             });
+                                  //             Navigator.of(context).pushNamed(
+                                  //               '/login',
+                                  //               arguments: null,
+                                  //             );
+                                  //           }),
+                                  //         }
+                                  //       else
+                                  //         {
+                                  //           setState(() {
+                                  //             isLoading =
+                                  //                 false; // Desativar o estado de carregamento
+                                  //           }),
+                                  //           MySnackbar.show(context,
+                                  //               'Humm...Houve algum erro na criacão do usuário, tente novamente se o erro persistir entre em contato cmo suporte')
+                                  //         }
+                                  //     });
+                                }
+                              },
+                              child: isLoading
+                                  ? const CircularProgressIndicator(
+                                      valueColor:
+                                          AlwaysStoppedAnimation(Colors.white),
+                                    ) // Mostrar um indicador de carregamento
+                                  : const Text(
+                                      'Atualizar Dados',
                                       style: TextStyle(
                                         fontSize: 18,
                                       ),
