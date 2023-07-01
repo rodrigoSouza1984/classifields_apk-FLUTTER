@@ -12,22 +12,28 @@ class InputComponent extends StatefulWidget {
   final bool errorText; //aki
   final TextInputType? keyboardType;
   final TextEditingController? controller;
-  final String? Function(String?)? validator;  
+  final String? Function(String?)? validator;
+  final ValueChanged<String>? onChanged;
+  final String? initialValue;
+  bool isUpdate;
 
   bool isObscure = false; //don't need receive by constructor
 
-  InputComponent({
-    Key? key,
-    required this.icon,
-    required this.label,
-    this.readOnly = false,
-    this.keyboardType,
-    this.isDate = false,
-    this.isSecret = false,
-    this.errorText = false,
-    this.controller,
-    this.validator,    
-  }) : super(key: key);
+  InputComponent(
+      {Key? key,
+      required this.icon,
+      required this.label,
+      this.readOnly = false,
+      this.keyboardType,
+      this.isDate = false,
+      this.isSecret = false,
+      this.errorText = false,
+      this.controller,
+      this.validator,
+      this.onChanged,
+      this.initialValue = '',
+      this.isUpdate = false})
+      : super(key: key);
 
   @override
   State<InputComponent> createState() => _InputComponentState();
@@ -36,7 +42,7 @@ class InputComponent extends StatefulWidget {
 class _InputComponentState extends State<InputComponent> {
   final UserController userController = UserController(); //aki
   List<dynamic>? nickNameValidator = []; //aki3
-  bool emailExists= false;
+  bool emailExists = false;
   String errorText = '';
 
   final FormatDate formatDate = FormatDate();
@@ -87,10 +93,14 @@ class _InputComponentState extends State<InputComponent> {
     super.dispose();
   }
 
-  void _handleFocusChange() async {
+  void _handleFocusChange() async {    
+
+    if (widget.isUpdate == true) {
+      return;
+    }
     //aki add
     if (!_focusNode.hasFocus) {
-      if (widget.label == 'NickName') {
+      if (widget.label == 'NickName' && widget.controller!.text != '') {
         nickNameValidator =
             await userController.createUserNameUnique(widget.controller!.text);
 
@@ -104,14 +114,13 @@ class _InputComponentState extends State<InputComponent> {
             errorText = '';
           });
         }
-      }else if(widget.label == 'Email'){
+      } else if (widget.label == 'Email') {
         emailExists =
             await userController.verifyEmailExists(widget.controller!.text);
 
         if (emailExists == true) {
           setState(() {
-            errorText =
-                'Email já cadastrado escolha outro para seu registro';
+            errorText = 'Email já cadastrado escolha outro para seu registro';
           });
         } else {
           setState(() {
@@ -128,6 +137,7 @@ class _InputComponentState extends State<InputComponent> {
       padding: const EdgeInsets.only(bottom: 15),
       child: TextFormField(
         controller: widget.controller,
+        onChanged: widget.onChanged,
         onTap: () async {
           if (widget.isDate != true) {
             return;
@@ -136,7 +146,7 @@ class _InputComponentState extends State<InputComponent> {
           }
         },
         obscureText: isObscure,
-        //keyboardType: widget.keyboardType,        
+        //keyboardType: widget.keyboardType,
         readOnly: widget.readOnly,
         focusNode: _focusNode,
         validator: widget.validator,

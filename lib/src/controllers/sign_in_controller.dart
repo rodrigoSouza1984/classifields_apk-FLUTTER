@@ -123,6 +123,7 @@ class SignInController {
           final userLocal = await userController.userLocalData();
 
           if (userLocal != null) {
+            print('dentro do if userLocal do refresh token: ${userLocal}');
             return userLocal.token;
           }          
         }
@@ -136,7 +137,7 @@ class SignInController {
 
   Future<dynamic> logout() async {
     try {
-      storageService.removeLocalData(key: ConstantsApk.userLogado).then((value) => NavigationService.pushNamed('/login'));
+      storageService.removeLocalData(key: ConstantsApk.userLogado);//.then((value) => NavigationService.pushNamed('/login'));
       return true;
     } catch (err) {
       throw Exception('$err ,Error in create user');

@@ -12,7 +12,7 @@ class UserController {
 
   final storageService = StorageService();
 
-  Future<dynamic> createUserNameUnique(String userName) async {
+  Future<dynamic> createUserNameUnique(String? userName) async {
     try {
       if (userName == '' || userName == null) {
         return;

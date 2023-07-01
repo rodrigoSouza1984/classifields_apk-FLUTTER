@@ -137,7 +137,7 @@ class _MenuComponentWidgetState extends State<MenuComponentWidget> {
     try{
       _selectedValue.value = value;
     if (value == 'Logout') {
-      authController.logout();
+      authController.logout().then((value) => NavigationService.pushNamed('/login'));
     } else if (value == 'Dados Cadastrais') {
       print('Dados Cadastrais clicado');      
       NavigationService.pushNamed('/register', arguments: user);      
