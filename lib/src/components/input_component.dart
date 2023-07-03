@@ -14,26 +14,27 @@ class InputComponent extends StatefulWidget {
   final TextEditingController? controller;
   final String? Function(String?)? validator;
   final ValueChanged<String>? onChanged;
-  final String? initialValue;
+
   bool isUpdate;
+  final TextEditingController? valueStartInpuWhenIsUpdat;
 
   bool isObscure = false; //don't need receive by constructor
 
-  InputComponent(
-      {Key? key,
-      required this.icon,
-      required this.label,
-      this.readOnly = false,
-      this.keyboardType,
-      this.isDate = false,
-      this.isSecret = false,
-      this.errorText = false,
-      this.controller,
-      this.validator,
-      this.onChanged,
-      this.initialValue = '',
-      this.isUpdate = false})
-      : super(key: key);
+  InputComponent({
+    Key? key,
+    required this.icon,
+    required this.label,
+    this.readOnly = false,
+    this.keyboardType,
+    this.isDate = false,
+    this.isSecret = false,
+    this.errorText = false,
+    this.controller,
+    this.validator,
+    this.onChanged,
+    this.isUpdate = false,
+    this.valueStartInpuWhenIsUpdat,
+  }) : super(key: key);
 
   @override
   State<InputComponent> createState() => _InputComponentState();
@@ -93,39 +94,86 @@ class _InputComponentState extends State<InputComponent> {
     super.dispose();
   }
 
-  void _handleFocusChange() async {    
-
-    if (widget.isUpdate == true) {
-      return;
-    }
-    //aki add
+  void _handleFocusChange() async {
     if (!_focusNode.hasFocus) {
-      if (widget.label == 'NickName' && widget.controller!.text != '') {
-        nickNameValidator =
-            await userController.createUserNameUnique(widget.controller!.text);
+      if (widget.label == 'NickName' && widget.controller!.text != '') {//nickname validator function
+        if (!widget.isUpdate) {
+          nickNameValidator = await userController
+              .createUserNameUnique(widget.controller!.text);
 
-        if (nickNameValidator?[0] != widget.controller!.text) {
-          setState(() {
-            errorText =
-                'NickName já existe , \nsugestões: ${nickNameValidator?[0]} , \n${nickNameValidator?[1]} , ${nickNameValidator?[2]}';
-          });
+          if (nickNameValidator?[0] != widget.controller!.text) {
+            setState(() {
+              errorText =
+                  'NickName já existe , \nsugestões: ${nickNameValidator?[0]} , \n${nickNameValidator?[1]} , ${nickNameValidator?[2]}';
+            });
+          } else {
+            setState(() {
+              errorText = '';
+            });
+          }
         } else {
-          setState(() {
-            errorText = '';
-          });
+
+          if (widget.controller!.text !=
+              widget.valueStartInpuWhenIsUpdat?.text) {
+            nickNameValidator = await userController
+                .createUserNameUnique(widget.controller!.text);
+
+            if (nickNameValidator?[0] != widget.controller!.text) {
+              setState(() {
+                errorText =
+                    'NickName já existe , \nsugestões: ${nickNameValidator?[0]} , \n${nickNameValidator?[1]} , ${nickNameValidator?[2]}';
+              });
+            } else {
+              setState(() {
+                errorText = '';
+              });
+            }
+
+          } else {
+            setState(() {
+              errorText = '';
+            });
+          }
+
         }
-      } else if (widget.label == 'Email') {
-        emailExists =
-            await userController.verifyEmailExists(widget.controller!.text);
+      } else if (widget.label == 'Email' && widget.controller!.text != '') {//email validator functions
+        if (!widget.isUpdate) {
+          emailExists =
+              await userController.verifyEmailExists(widget.controller!.text);
 
-        if (emailExists == true) {
-          setState(() {
-            errorText = 'Email já cadastrado escolha outro para seu registro';
-          });
-        } else {
-          setState(() {
-            errorText = '';
-          });
+          if (emailExists == true) {
+            setState(() {
+              errorText = 'Email já cadastrado escolha outro para seu registro';
+            });
+          } else {
+            setState(() {
+              errorText = '';
+            });
+          }
+        } else {       
+
+          if (widget.controller!.text !=
+              widget.valueStartInpuWhenIsUpdat?.text) {
+            emailExists =
+                await userController.verifyEmailExists(widget.controller!.text);
+
+            if (emailExists == true) {
+              setState(() {
+                errorText =
+                    'Email já cadastrado escolha outro para seu registro';
+              });
+            } else {
+              setState(() {
+                errorText = '';
+              });
+            }
+
+          } else {
+            setState(() {
+              errorText = '';
+            });
+            
+          }
         }
       }
     }

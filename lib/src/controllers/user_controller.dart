@@ -77,6 +77,37 @@ class UserController {
     }
   }
 
+  Future<dynamic> updatePatchUser(int? userId ,body) async {
+    try {
+      String jsonBody = jsonEncode(body);
+      String? token = '';      
+
+      await userLocalData().then((value) => {
+        token = value.token,        
+      });
+
+      Map<String, String> headers = {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      };      
+
+      http.Response response = await client.patch(Uri.parse('${env.baseUrl}/user/$userId'),
+          headers: headers.cast<String, String>(), body: jsonBody);
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        final user = UserModel.fromMap(jsonDecode(response.body));
+
+        return user;
+      } else {
+        print('aconteceu um erro: ${response.statusCode}, ${response.body}, METHOD => updatePatchUser');
+        return null;
+      }
+    } catch (e) {
+      print('$e ,Error in create user, METHOD => updatePatchUser');
+      return null;
+    }
+  }
+
   Future<dynamic> getUserById(int? userId) async {
     try {
       String? token = '';
@@ -120,4 +151,63 @@ class UserController {
       throw Exception('$err ,Error in create user');
     }
   }
+
+  Future<dynamic> deleteImageAvatar(int? userId, String? fileName) async {
+    try {
+      String? token = '';
+
+      await userLocalData().then((value) => {token = value.token});
+
+      Map<String, String> headers = {
+        'Authorization': 'Bearer $token',
+      };
+
+      http.Response response = await client
+          .delete(Uri.parse('${env.baseUrl}/media-avatar/$userId/$fileName'), headers: headers);
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {        
+        return true;
+      } else {
+        print('aconteceu um erro: ${response.statusCode}, method => deleteImageAvatar');
+        return false;
+      }
+    } catch (e) {
+      throw Exception('$e ,Error in create user, method => deleteImageAvatar');
+    }
+  }
+
+
+  Future<dynamic> addMediaAvatarUser(int? userId ,body) async {
+    try {
+      String jsonBody = jsonEncode(body);
+      String? token = '';      
+
+      await userLocalData().then((value) => {
+        token = value.token,        
+      });
+
+      Map<String, String> headers = {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      };      
+
+      http.Response response = await client.post(Uri.parse('${env.baseUrl}/media-avatar/$userId'),
+          headers: headers.cast<String, String>(), body: jsonBody);
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        final mediaAddedResponse = UserModel.fromMap(jsonDecode(response.body));
+
+        return mediaAddedResponse;
+      } else {
+        print('aconteceu um erro: ${response.statusCode}, ${response.body}, METHOD => addMediaAvatarUser');
+        return null;
+      }
+    } catch (e) {
+      print('$e ,Error in create user, METHOD => addMediaAvatarUser');
+      return null;
+    }
+  }
+
+
+
 }
