@@ -150,8 +150,10 @@ class _RegisterState extends State<Register> {
                         ),
 
                   //CONTAINER FORMULARIO
-                  Container(
-                    height: MediaQuery.of(context).size.height * 0.88,
+                  Container(                    
+                    constraints: BoxConstraints( //constraints he go even 88% max of screen in the heigth
+                      maxHeight: MediaQuery.of(context).size.height * 0.88,
+                    ),
                     padding: const EdgeInsets.only(
                         top: 20, left: 32, right: 32, bottom: 40),
                     decoration: const BoxDecoration(
