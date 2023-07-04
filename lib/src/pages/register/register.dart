@@ -7,6 +7,7 @@ import 'package:classifields_apk_flutter/src/controllers/user_controller.dart';
 import 'package:classifields_apk_flutter/src/services/image_video_photo_image_picker.dart';
 import 'package:classifields_apk_flutter/src/components/menu_modal_icon_buttons.dart';
 import 'package:classifields_apk_flutter/src/services/snack_bar_service.dart';
+import 'package:classifields_apk_flutter/src/controllers/sign_in_controller.dart';
 
 import 'dart:convert';
 
@@ -27,10 +28,13 @@ class _RegisterState extends State<Register> {
 
   final UserController userController = UserController();
 
+  final SignInController authController = SignInController();
+
   final imageVideoPhotoService = ImageVideoPhotoService();
 
   UserModel? user;
   bool isUpdate = false;
+  bool isUpdatePassword = false;
   bool isUpdateImage = false;
   String? imageUrlCameRoute = '';
 
@@ -76,6 +80,10 @@ class _RegisterState extends State<Register> {
 
   var confirmPasswordController = TextEditingController();
 
+  var newPasswordController = TextEditingController();
+
+  var confirmNewPasswordController = TextEditingController();
+
   var _formkey = GlobalKey<FormState>();
 
   @override
@@ -84,12 +92,20 @@ class _RegisterState extends State<Register> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // Acesso aos argumentos da rota
-      user = ModalRoute.of(context)?.settings.arguments as UserModel?;
+      Map<String, dynamic> arguments =
+          ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>;
+
+      final UserModel user = arguments['user'] as UserModel;
+      final bool updatePassword = arguments['updatePassword'] as bool;      
 
       if (user != null) {
         setState(() {
-          isUpdate = true;
-          isUpdateImage = true;
+          if (arguments['updatePassword'] == false) {
+            isUpdate = true;
+            isUpdateImage = true;
+          }         
+
+          isUpdatePassword = updatePassword;
 
           if (user?.mediaAvatar?.url != null) {
             imageUrlCameRoute = user?.mediaAvatar?.url;
@@ -119,39 +135,58 @@ class _RegisterState extends State<Register> {
               Column(
                 children: [
                   //TITULO DA TELA
-                  !isUpdate
-                      ? const Expanded(
-                          child: Padding(
-                            padding: EdgeInsets.only(top: 60),
-                            child: Center(
-                              child: Text(
-                                'Cadastro',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 35,
-                                ),
-                              ),
-                            ),
-                          ),
-                        )
-                      : const Expanded(
-                          child: Padding(
-                            padding: EdgeInsets.only(top: 60),
-                            child: Center(
-                              child: Text(
-                                'Dados Do Usuário',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 35,
-                                ),
-                              ),
+                  if (!isUpdate && !isUpdatePassword)
+                    const Expanded(
+                      child: Padding(
+                        padding: EdgeInsets.only(top: 60),
+                        child: Center(
+                          child: Text(
+                            'Cadastro',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 35,
                             ),
                           ),
                         ),
+                      ),
+                    ),
+
+                  if (isUpdate && !isUpdatePassword)
+                    const Expanded(
+                      child: Padding(
+                        padding: EdgeInsets.only(top: 60),
+                        child: Center(
+                          child: Text(
+                            'Dados Do Usuário',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 35,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+
+                  if (!isUpdate && isUpdatePassword)
+                    const Expanded(
+                      child: Padding(
+                        padding: EdgeInsets.only(top: 100),
+                        child: Center(
+                          child: Text(
+                            'Cadastre sua Nova Senha',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 30,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
 
                   //CONTAINER FORMULARIO
-                  Container(                    
-                    constraints: BoxConstraints( //constraints he go even 88% max of screen in the heigth
+                  Container(
+                    constraints: BoxConstraints(
+                      //constraints he go even 88% max of screen in the heigth
                       maxHeight: MediaQuery.of(context).size.height * 0.88,
                     ),
                     padding: const EdgeInsets.only(
@@ -168,291 +203,312 @@ class _RegisterState extends State<Register> {
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             // Avatar
-                            Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                isUpdateImage
-                                    ? CircleAvatar(
-                                        radius: 50,
-                                        backgroundColor: Colors.grey,
-                                        backgroundImage: imageUrlCameRoute != ''
-                                            ? NetworkImage(imageUrlCameRoute!)
-                                            : const Image(
-                                                image: AssetImage(
-                                                    'assets/images/avatarzinho.jpg'),
-                                              ).image as ImageProvider<Object>?,
-                                      )
-                                    : CircleAvatar(
-                                        radius: 50,
-                                        backgroundColor: Colors.grey,
-                                        backgroundImage: _imagePath != null
-                                            ? FileImage(File(_imagePath!))
-                                            : const Image(
-                                                image: AssetImage(
-                                                    'assets/images/avatarzinho.jpg'),
-                                              ).image as ImageProvider<Object>?,
-                                      ),
-                                Positioned(
-                                  top: 65,
-                                  bottom: 0,
-                                  child: IconButton(
-                                    icon: const Icon(
-                                      Icons.camera_alt,
-                                      color: Colors.white,
-                                    ),
-                                    onPressed: () async {
-                                      final result =
-                                          await showModalBottomSheet<dynamic>(
-                                        context: context,
-                                        shape: const RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.vertical(
-                                              top: Radius.circular(45)),
+                            if (!isUpdatePassword)
+                              Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  isUpdateImage
+                                      ? CircleAvatar(
+                                          radius: 50,
+                                          backgroundColor: Colors.grey,
+                                          backgroundImage: imageUrlCameRoute !=
+                                                  ''
+                                              ? NetworkImage(imageUrlCameRoute!)
+                                              : const Image(
+                                                  image: AssetImage(
+                                                      'assets/images/avatarzinho.jpg'),
+                                                ).image
+                                                  as ImageProvider<Object>?,
+                                        )
+                                      : CircleAvatar(
+                                          radius: 50,
+                                          backgroundColor: Colors.grey,
+                                          backgroundImage: _imagePath != null
+                                              ? FileImage(File(_imagePath!))
+                                              : const Image(
+                                                  image: AssetImage(
+                                                      'assets/images/avatarzinho.jpg'),
+                                                ).image
+                                                  as ImageProvider<Object>?,
                                         ),
-                                        builder: (BuildContext context) {
-                                          return MenuModalIconButtons(
-                                            title:
-                                                'Adicione uma Foto de Perfil',
-                                            icon: Icons.delete,
-                                            iconsWithTitles: const [
-                                              MapEntry(
-                                                  Icons.camera_alt, 'Câmera'),
-                                              MapEntry(Icons.photo,
-                                                  'Imagem Galeria'),
-                                              // MapEntry(
-                                              //     Icons.video_library, 'Vídeo'),
-                                            ],
-                                          );
-                                        },
-                                      );
-                                      print(
-                                          'Resultado do modal: ${result['selectedItem']}');
+                                  Positioned(
+                                    top: 65,
+                                    bottom: 0,
+                                    child: IconButton(
+                                      icon: const Icon(
+                                        Icons.camera_alt,
+                                        color: Colors.white,
+                                      ),
+                                      onPressed: () async {
+                                        final result =
+                                            await showModalBottomSheet<dynamic>(
+                                          context: context,
+                                          shape: const RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.vertical(
+                                                top: Radius.circular(45)),
+                                          ),
+                                          builder: (BuildContext context) {
+                                            return MenuModalIconButtons(
+                                              title:
+                                                  'Adicione uma Foto de Perfil',
+                                              icon: Icons.delete,
+                                              iconsWithTitles: const [
+                                                MapEntry(
+                                                    Icons.camera_alt, 'Câmera'),
+                                                MapEntry(Icons.photo,
+                                                    'Imagem Galeria'),
+                                                // MapEntry(
+                                                //     Icons.video_library, 'Vídeo'),
+                                              ],
+                                            );
+                                          },
+                                        );
+                                        print(
+                                            'Resultado do modal: ${result['selectedItem']}');
 
-                                      if (result['selectedItem'] != '') {
-                                        setState(() {
-                                          _image = result['image'];
-                                          _imagePath = result['imagePath'];
-
-                                          isUpdateImage = false;
-                                        });
-
-                                        String base64Image = base64Encode(
-                                            result['image'].readAsBytesSync());
-                                        String timestamp = DateTime.now()
-                                            .toUtc()
-                                            .toIso8601String();
-                                        String mimeType = 'image/jpeg';
-
-                                        Map<String, dynamic> imageObjectMap = {
-                                          'name': '$timestamp.jpeg',
-                                          'base64':
-                                              'data:image/jpeg;base64,$base64Image',
-                                          'mimeType': mimeType,
-                                        };
-
-                                        userAvatar = imageObjectMap;
-
-                                        if (isUpdate) {
-                                          if (isLoading == true) {
-                                            return;
-                                          }
-
+                                        if (result['selectedItem'] != '') {
                                           setState(() {
-                                            isLoading =
-                                                true; // Ativar o estado de carregamento
+                                            _image = result['image'];
+                                            _imagePath = result['imagePath'];
+
+                                            isUpdateImage = false;
                                           });
 
-                                          if (imageUrlCameRoute != '') {
+                                          String base64Image = base64Encode(
+                                              result['image']
+                                                  .readAsBytesSync());
+                                          String timestamp = DateTime.now()
+                                              .toUtc()
+                                              .toIso8601String();
+                                          String mimeType = 'image/jpeg';
+
+                                          Map<String, dynamic> imageObjectMap =
+                                              {
+                                            'name': '$timestamp.jpeg',
+                                            'base64':
+                                                'data:image/jpeg;base64,$base64Image',
+                                            'mimeType': mimeType,
+                                          };
+
+                                          userAvatar = imageObjectMap;
+
+                                          if (isUpdate) {
+                                            if (isLoading == true) {
+                                              return;
+                                            }
+
+                                            setState(() {
+                                              isLoading =
+                                                  true; // Ativar o estado de carregamento
+                                            });
+
+                                            if (imageUrlCameRoute != '') {
+                                              await userController
+                                                  .deleteImageAvatar(user?.id,
+                                                      user?.mediaAvatar?.name)
+                                                  .then((value) async {
+                                                if (value == true) {
+                                                  await userController
+                                                      .addMediaAvatarUser(
+                                                          user?.id, userAvatar)
+                                                      .then((value) async {
+                                                    await authController
+                                                        .refreshToken();
+                                                    Future.delayed(
+                                                        const Duration(
+                                                            seconds: 1), () {
+                                                      MySnackbar.show(context,
+                                                          'Imagem adicionada/trocada com sussesso!.');
+                                                    });
+                                                    Future.delayed(
+                                                        const Duration(
+                                                            seconds: 2), () {
+                                                      setState(() {
+                                                        imageUrlCameRoute = '';
+                                                        isLoading =
+                                                            false; // Desativar o estado de carregamento
+                                                      });
+                                                    });
+                                                  });
+                                                }
+                                              });
+                                            } else {
+                                              await userController
+                                                  .addMediaAvatarUser(
+                                                      user?.id, userAvatar)
+                                                  .then((value) async {
+                                                await authController
+                                                    .refreshToken();
+                                                Future.delayed(
+                                                    const Duration(seconds: 1),
+                                                    () {
+                                                  MySnackbar.show(context,
+                                                      'Imagem adicionada/trocada com sussesso!.');
+                                                });
+                                                Future.delayed(
+                                                    const Duration(seconds: 2),
+                                                    () {
+                                                  setState(() {
+                                                    imageUrlCameRoute = '';
+                                                    isLoading =
+                                                        false; // Desativar o estado de carregamento
+                                                  });
+                                                });
+                                              });
+                                            }
+                                          }
+
+                                          // Use o objeto "imageObject" conforme necessário
+                                          print(
+                                              '${_image.runtimeType} , objeto image');
+                                        } else {
+                                          setState(() {
+                                            _image = null;
+                                            _imagePath = null;
+                                          });
+
+                                          userAvatar = null;
+
+                                          if (isUpdate) {
+                                            if (isLoading == true) {
+                                              return;
+                                            }
+
+                                            setState(() {
+                                              isLoading =
+                                                  true; // Ativar o estado de carregamento
+                                            });
+
                                             await userController
                                                 .deleteImageAvatar(user?.id,
                                                     user?.mediaAvatar?.name)
                                                 .then((value) async {
                                               if (value == true) {
-                                                await userController
-                                                    .addMediaAvatarUser(
-                                                        user?.id, userAvatar)
-                                                    .then((value) {
-                                                  Future.delayed(
-                                                      const Duration(
-                                                          seconds: 1), () {
-                                                    MySnackbar.show(context,
-                                                        'Imagem adicionada/trocada com sussesso!.');
-                                                  });
-                                                  Future.delayed(
-                                                      const Duration(
-                                                          seconds: 2), () {
-                                                    setState(() {
-                                                      imageUrlCameRoute = '';
-                                                      isLoading =
-                                                          false; // Desativar o estado de carregamento
-                                                    });
+                                                await authController
+                                                    .refreshToken();
+                                                Future.delayed(
+                                                    const Duration(seconds: 1),
+                                                    () {
+                                                  MySnackbar.show(context,
+                                                      'Imagem apagada com sussesso!.');
+                                                });
+                                                Future.delayed(
+                                                    const Duration(seconds: 2),
+                                                    () {
+                                                  setState(() {
+                                                    imageUrlCameRoute = '';
+                                                    isLoading =
+                                                        false; // Desativar o estado de carregamento
                                                   });
                                                 });
                                               }
                                             });
-                                          } else {
-                                            await userController
-                                                .addMediaAvatarUser(
-                                                    user?.id, userAvatar)
-                                                .then((value) {
-                                              Future.delayed(
-                                                  const Duration(seconds: 1),
-                                                  () {
-                                                MySnackbar.show(context,
-                                                    'Imagem adicionada/trocada com sussesso!.');
-                                              });
-                                              Future.delayed(
-                                                  const Duration(seconds: 2),
-                                                  () {
-                                                setState(() {
-                                                  imageUrlCameRoute = '';
-                                                  isLoading =
-                                                      false; // Desativar o estado de carregamento
-                                                });
-                                              });
-                                            });
-                                          }
-                                        }
-
-                                        // Use o objeto "imageObject" conforme necessário
-                                        print(
-                                            '${_image.runtimeType} , objeto image');
-                                      } else {
-                                        setState(() {
-                                          _image = null;
-                                          _imagePath = null;
-                                        });
-
-                                        userAvatar = null;
-
-                                        if (isUpdate) {
-                                          if (isLoading == true) {
-                                            return;
                                           }
 
-                                          setState(() {
-                                            isLoading =
-                                                true; // Ativar o estado de carregamento
-                                          });
-
-                                          await userController
-                                              .deleteImageAvatar(user?.id,
-                                                  user?.mediaAvatar?.name)
-                                              .then((value) {
-                                            if (value == true) {
-                                              Future.delayed(
-                                                  const Duration(seconds: 1),
-                                                  () {
-                                                MySnackbar.show(context,
-                                                    'Imagem apagada com sussesso!.');
-                                              });
-                                              Future.delayed(
-                                                  const Duration(seconds: 2),
-                                                  () {
-                                                setState(() {
-                                                  imageUrlCameRoute = '';
-                                                  isLoading =
-                                                      false; // Desativar o estado de carregamento
-                                                });
-                                              });
-                                            }
-                                          });
+                                          print('${userAvatar} , objeto image');
                                         }
-
-                                        print('${userAvatar} , objeto image');
-                                      }
-                                    },
+                                      },
+                                    ),
                                   ),
-                                ),
-                              ],
-                            ),
+                                ],
+                              ),
 
                             const SizedBox(
                               height: 20,
                             ),
 
-                            InputComponent(
-                              controller: nickNameController,
-                              valueStartInpuWhenIsUpdat: isUpdate
-                                  ? TextEditingController(text: user?.userName)
-                                  : null,
-                              keyboardType: TextInputType.text,
-                              icon: Icons.account_circle,
-                              label: 'NickName',
-                              isUpdate: isUpdate ? isUpdate : false,
-                              errorText: true,
-                              validator: (nickName) {
-                                if (nickName == null || nickName.isEmpty) {
-                                  return 'Escolha um nickName';
-                                }
-
-                                if (nickName.length < 2) {
-                                  return 'Digite um nickname com pelo menos 2 caracteres.';
-                                }
-
-                                return null;
-                              },
-                            ),
-                            InputComponent(
-                              controller: realNameController,
-                              keyboardType: TextInputType.text,
-                              isUpdate: isUpdate ? isUpdate : false,
-                              icon: Icons.person,
-                              label: 'Nome completo',
-                              validator: (realName) {
-                                if (realName == null || realName.isEmpty) {
-                                  return 'Cadastre seu nome completo';
-                                }
-                                return null;
-                              },
-                            ),
-                            InputComponent(
-                              controller: emailController,
-                              valueStartInpuWhenIsUpdat: isUpdate
-                                  ? TextEditingController(text: user?.email)
-                                  : null,
-                              keyboardType: TextInputType.emailAddress,
-                              isUpdate: isUpdate ? isUpdate : false,
-                              icon: Icons.email,
-                              label: 'Email',
-                              errorText: true,
-                              validator: (email) {
-                                if (email == null || email.isEmpty) {
-                                  return 'Digite seu Email';
-                                }
-                                if (!email.contains('@')) {
-                                  return 'Digite um email válido';
-                                }
-                                return null;
-                              },
-                            ),
-                            InputComponent(
-                              controller: birthdateController,
-                              keyboardType: TextInputType.none,
-                              isUpdate: isUpdate ? isUpdate : false,
-                              icon: Icons.calendar_month,
-                              label: 'Data de Nascimento',
-                              readOnly: true,
-                              isDate: true,
-                              validator: (bithDate) {
-                                if (bithDate == null ||
-                                    bithDate.isEmpty ||
-                                    bithDate.toLowerCase() == 'n/a') {
-                                  return 'Cadastre sua data de nascimento, é obrigatório';
-                                }
-
-                                if (bithDate != null &&
-                                    bithDate.isNotEmpty &&
-                                    bithDate.toLowerCase() != 'n/a') {
-                                  if (validateBirthDateOver18YearsOld(
-                                          birthdateController.text)! <
-                                      18) {
-                                    return 'É necessário ter pelo menos 18 anos.';
+                            if (!isUpdatePassword)
+                              InputComponent(
+                                controller: nickNameController,
+                                valueStartInpuWhenIsUpdat: isUpdate
+                                    ? TextEditingController(
+                                        text: user?.userName)
+                                    : null,
+                                keyboardType: TextInputType.text,
+                                icon: Icons.account_circle,
+                                label: 'NickName',
+                                isUpdate: isUpdate ? isUpdate : false,
+                                errorText: true,
+                                validator: (nickName) {
+                                  if (nickName == null || nickName.isEmpty) {
+                                    return 'Escolha um nickName';
                                   }
-                                }
 
-                                return null;
-                              },
-                            ),
+                                  if (nickName.length < 2) {
+                                    return 'Digite um nickname com pelo menos 2 caracteres.';
+                                  }
+
+                                  return null;
+                                },
+                              ),
+
+                            if (!isUpdatePassword)
+                              InputComponent(
+                                controller: realNameController,
+                                keyboardType: TextInputType.text,
+                                isUpdate: isUpdate ? isUpdate : false,
+                                icon: Icons.person,
+                                label: 'Nome completo',
+                                validator: (realName) {
+                                  if (realName == null || realName.isEmpty) {
+                                    return 'Cadastre seu nome completo';
+                                  }
+                                  return null;
+                                },
+                              ),
+
+                            if (!isUpdatePassword)
+                              InputComponent(
+                                controller: emailController,
+                                valueStartInpuWhenIsUpdat: isUpdate
+                                    ? TextEditingController(text: user?.email)
+                                    : null,
+                                keyboardType: TextInputType.emailAddress,
+                                isUpdate: isUpdate ? isUpdate : false,
+                                icon: Icons.email,
+                                label: 'Email',
+                                errorText: true,
+                                validator: (email) {
+                                  if (email == null || email.isEmpty) {
+                                    return 'Digite seu Email';
+                                  }
+                                  if (!email.contains('@')) {
+                                    return 'Digite um email válido';
+                                  }
+                                  return null;
+                                },
+                              ),
+
+                            if (!isUpdatePassword)
+                              InputComponent(
+                                controller: birthdateController,
+                                keyboardType: TextInputType.none,
+                                isUpdate: isUpdate ? isUpdate : false,
+                                icon: Icons.calendar_month,
+                                label: 'Data de Nascimento',
+                                readOnly: true,
+                                isDate: true,
+                                validator: (bithDate) {
+                                  if (bithDate == null ||
+                                      bithDate.isEmpty ||
+                                      bithDate.toLowerCase() == 'n/a') {
+                                    return 'Cadastre sua data de nascimento, é obrigatório';
+                                  }
+
+                                  if (bithDate != null &&
+                                      bithDate.isNotEmpty &&
+                                      bithDate.toLowerCase() != 'n/a') {
+                                    if (validateBirthDateOver18YearsOld(
+                                            birthdateController.text)! <
+                                        18) {
+                                      return 'É necessário ter pelo menos 18 anos.';
+                                    }
+                                  }
+
+                                  return null;
+                                },
+                              ),
+
                             if (!isUpdate)
                               InputComponent(
                                 controller: passwordController,
@@ -472,6 +528,7 @@ class _RegisterState extends State<Register> {
                                   return null;
                                 },
                               ),
+
                             if (!isUpdate)
                               InputComponent(
                                 controller: confirmPasswordController,
@@ -493,9 +550,52 @@ class _RegisterState extends State<Register> {
                                   return null;
                                 },
                               ),
+
+                            if (!isUpdate && isUpdatePassword)
+                              InputComponent(
+                                controller: newPasswordController,
+                                keyboardType: TextInputType.visiblePassword,
+                                icon: Icons.lock,
+                                label: 'Nova Senha',
+                                isSecret: true,
+                                validator: (newPassword) {
+                                  if (newPassword == null || newPassword.isEmpty) {
+                                    return 'Digite sua nova senha';
+                                  }
+
+                                  if (!validarSenha(newPassword)) {
+                                    return 'Digite uma senha com pelo menos 7 caracteres \ncom no minimo 1 caracter especial \ne 1 letra maiuscula.';
+                                  }
+
+                                  return null;
+                                },
+                              ),
+
+                            if (!isUpdate && isUpdatePassword)
+                              InputComponent(
+                                controller: confirmNewPasswordController,
+                                keyboardType: TextInputType.visiblePassword,
+                                icon: Icons.lock,
+                                label: 'Confirmação da Nova Senha',
+                                isSecret: true,
+                                validator: (confirmNewPassword) {
+                                  if (confirmNewPassword == null ||
+                                      confirmNewPassword.isEmpty) {
+                                    return 'Digite sua a confirmação da Nova senha';
+                                  }
+
+                                  if (confirmNewPasswordController.text !=
+                                      newPasswordController.text) {
+                                    return 'Nova Senha e Nova Confirmacão de senha devem ser iguais';
+                                  }
+
+                                  return null;
+                                },
+                              ),
+                            
                             SizedBox(
                               height: 50,
-                              child: !isUpdate
+                              child: !isUpdate && !isUpdatePassword                                                             
                                   ? ElevatedButton(
                                       style: ElevatedButton.styleFrom(
                                           shape: RoundedRectangleBorder(
@@ -597,7 +697,7 @@ class _RegisterState extends State<Register> {
                                               ),
                                             ),
                                     )
-                                  : ElevatedButton(
+                                  : isUpdate && !isUpdatePassword ? ElevatedButton(
                                       style: ElevatedButton.styleFrom(
                                           shape: RoundedRectangleBorder(
                                               borderRadius:
@@ -624,7 +724,9 @@ class _RegisterState extends State<Register> {
                                             'email': emailController.text,
                                             'dateOfBirth':
                                                 birthdateController.text,
-                                          }).then((resp) => {
+                                          }).then((resp) async => {
+                                                await authController
+                                                    .refreshToken(),
                                                 Future.delayed(
                                                     const Duration(seconds: 1),
                                                     () {
@@ -659,7 +761,74 @@ class _RegisterState extends State<Register> {
                                                 fontSize: 18,
                                               ),
                                             ),
+                                    ) 
+                                    : ElevatedButton(
+                                      style: ElevatedButton.styleFrom(
+                                          shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(18))),
+                                      onPressed: () async {
+                                        FocusScope.of(context).unfocus();
+
+                                        if (isLoading == true) {
+                                          return;
+                                        }
+
+                                        setState(() {
+                                          isLoading =
+                                              true; // Ativar o estado de carregamento
+                                        });
+
+                                        FocusScope.of(context).unfocus();
+
+                                        if (_formkey.currentState!.validate()) {
+                                          await userController.updatePatchUser(
+                                              user?.id, {
+                                            'userName': nickNameController.text,
+                                            'realName': realNameController.text,
+                                            'email': emailController.text,
+                                            'dateOfBirth':
+                                                birthdateController.text,
+                                          }).then((resp) async => {
+                                                await authController
+                                                    .refreshToken(),
+                                                Future.delayed(
+                                                    const Duration(seconds: 1),
+                                                    () {
+                                                  MySnackbar.show(context,
+                                                      'Dados atualizados com sussesso.');
+                                                }),
+                                                Future.delayed(
+                                                    const Duration(seconds: 2),
+                                                    () {
+                                                  setState(() {
+                                                    isLoading =
+                                                        false; // Desativar o estado de carregamento
+                                                  });
+                                                }),
+                                              });
+                                        } else {
+                                          setState(() {
+                                            isLoading =
+                                                false; // Ativar o estado de carregamento
+                                          });
+                                        }
+                                      },
+                                      child: isLoading
+                                          ? const CircularProgressIndicator(
+                                              valueColor:
+                                                  AlwaysStoppedAnimation(
+                                                      Colors.white),
+                                            ) // Mostrar um indicador de carregamento
+                                          : const Text(
+                                              'Atualizar Nova Senha',
+                                              style: TextStyle(
+                                                fontSize: 18,
+                                              ),
+                                            ),
                                     ),
+                             
+                                  
                             )
                           ],
                         ),

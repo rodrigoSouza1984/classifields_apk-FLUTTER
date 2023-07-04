@@ -25,14 +25,13 @@ class MenuComponentWidget extends StatefulWidget {
 class _MenuComponentWidgetState extends State<MenuComponentWidget> {
   final ValueNotifier<String?> _selectedValue = ValueNotifier<String?>(null);
   final SignInController authController = SignInController();
-  final UserController userController = UserController();  
-  UserModel user = UserModel();  
-
+  final UserController userController = UserController();
+  UserModel user = UserModel();
 
   List<MenuItem> listFullItems = [
     MenuItem(name: 'Dados Cadastrais', icon: Icons.perm_identity),
     MenuItem(name: 'Usuários Cadastrados', icon: Icons.perm_identity),
-    MenuItem(name: 'Item 3', icon: Icons.access_time),
+    MenuItem(name: 'Trocar Senha', icon: Icons.lock),
     MenuItem(name: 'Logout', icon: Icons.logout),
   ];
 
@@ -41,15 +40,15 @@ class _MenuComponentWidgetState extends State<MenuComponentWidget> {
   @override
   initState() {
     super.initState();
-    
+
     getLocalUser();
-  }  
+  }
 
-  getLocalUser()async{
-      final userLocal = await userController.userLocalData();      
+  getLocalUser() async {
+    final userLocal = await userController.userLocalData();
 
-      if(userLocal != null){
-        await userController.getUserById(userLocal.id).then((value) async => {
+    if (userLocal != null) {
+      await userController.getUserById(userLocal.id).then((value) async => {
             setState(() {
               user = value;
             }),
@@ -58,12 +57,12 @@ class _MenuComponentWidgetState extends State<MenuComponentWidget> {
                 addItemsFilteredsToList(),
               },
           });
-      }else{
-        print('erro aki karalho $userLocal');
-      }      
+    } else {
+      print('erro aki karalho $userLocal');
     }
+  }
 
-  void addItemsFilteredsToList() {   
+  void addItemsFilteredsToList() {
     listWithFilterShowMenu.add(listFullItems[
         listFullItems.indexWhere((item) => item.name == 'Dados Cadastrais')]);
 
@@ -74,13 +73,13 @@ class _MenuComponentWidgetState extends State<MenuComponentWidget> {
     }
 
     listWithFilterShowMenu.add(listFullItems[
-        listFullItems.indexWhere((item) => item.name == 'Item 3')]);
+        listFullItems.indexWhere((item) => item.name == 'Trocar Senha')]);
 
     listWithFilterShowMenu.add(listFullItems[
         listFullItems.indexWhere((item) => item.name == 'Logout')]);
 
     List<String> values = //convertendo para poder printar
-        listWithFilterShowMenu.map((item) => item.name).toList();    
+        listWithFilterShowMenu.map((item) => item.name).toList();
   }
 
   @override
@@ -119,7 +118,7 @@ class _MenuComponentWidgetState extends State<MenuComponentWidget> {
                   return ListTile(
                     title: Text(listWithFilterShowMenu[index].name),
                     leading: Icon(listWithFilterShowMenu[index].icon),
-                    onTap: () {                      
+                    onTap: () {
                       Navigator.pop(context); // Fechar o menu após a seleção
                       _handleItemSelected(listWithFilterShowMenu[index].name);
                     },
@@ -134,22 +133,34 @@ class _MenuComponentWidgetState extends State<MenuComponentWidget> {
   }
 
   void _handleItemSelected(String value) async {
-    try{
+    try {
       _selectedValue.value = value;
-    if (value == 'Logout') {
-      authController.logout().then((value) => NavigationService.pushNamed('/login'));
-    } else if (value == 'Dados Cadastrais') {
-      print('Dados Cadastrais clicado');      
-      NavigationService.pushNamed('/register', arguments: user);      
-    } else if (value == 'Usuários Cadastrados') {
-      print('Item 2 clicado');
-    } else if (value == 'Item 3') {
-      print('Item 3 clicado');
-    }
-    widget.onItemSelected(value);
-    }catch(e){
+
+      if (value == 'Logout') {
+        authController
+            .logout()
+            .then((value) => NavigationService.pushNamed('/login'));
+      } else if (value == 'Dados Cadastrais') {
+        Map<String, dynamic> arguments = {
+          'user': user,
+          'updatePassword': false,
+        };
+
+        NavigationService.pushNamed('/register', arguments: arguments);
+      } else if (value == 'Usuários Cadastrados') {
+        print('Item 2 clicado');
+      } else if (value == 'Trocar Senha') {
+        Map<String, dynamic> arguments = {
+          'user': user,
+          'updatePassword': true,
+        };
+        
+        NavigationService.pushNamed('/register', arguments: arguments);
+      }
+      widget.onItemSelected(value);
+    } catch (e) {
       print('teste erro aki , $e');
-    }    
+    }
   }
 
   @override
