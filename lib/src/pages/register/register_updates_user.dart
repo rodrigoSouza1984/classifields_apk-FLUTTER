@@ -38,6 +38,8 @@ class _RegisterState extends State<Register> {
   bool isUpdateImage = false;
   String? imageUrlCameRoute = '';
 
+  bool isUpdatePasswordNewPassword = false;
+
   bool validarSenha(String password) {
     //validator password function
     RegExp regex = RegExp(r'^(?=.*[0-9])(?=.*[\W_]).{7,}$');
@@ -96,14 +98,16 @@ class _RegisterState extends State<Register> {
           ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>;
 
       final UserModel user = arguments['user'] as UserModel;
-      final bool updatePassword = arguments['updatePassword'] as bool;      
+      final bool updatePassword = arguments['updatePassword'] as bool;
+
+      print('user user ${user.id}');
 
       if (user != null) {
         setState(() {
           if (arguments['updatePassword'] == false) {
             isUpdate = true;
             isUpdateImage = true;
-          }         
+          }
 
           isUpdatePassword = updatePassword;
 
@@ -509,12 +513,14 @@ class _RegisterState extends State<Register> {
                                 },
                               ),
 
-                            if (!isUpdate)
+                            if (!isUpdate && !isUpdatePasswordNewPassword)
                               InputComponent(
                                 controller: passwordController,
                                 keyboardType: TextInputType.visiblePassword,
                                 icon: Icons.lock,
-                                label: 'Senha',
+                                label: !isUpdatePassword
+                                    ? 'Senha'
+                                    : 'Digite Senha Atual',
                                 isSecret: true,
                                 validator: (password) {
                                   if (password == null || password.isEmpty) {
@@ -529,12 +535,14 @@ class _RegisterState extends State<Register> {
                                 },
                               ),
 
-                            if (!isUpdate)
+                            if (!isUpdate && !isUpdatePasswordNewPassword)
                               InputComponent(
                                 controller: confirmPasswordController,
                                 keyboardType: TextInputType.visiblePassword,
                                 icon: Icons.lock,
-                                label: 'Confirmação da Senha',
+                                label: !isUpdatePassword
+                                    ? 'Confirmação da Senha Atual'
+                                    : 'Confirmação da Senha',
                                 isSecret: true,
                                 validator: (confirmPassword) {
                                   if (confirmPassword == null ||
@@ -551,15 +559,18 @@ class _RegisterState extends State<Register> {
                                 },
                               ),
 
-                            if (!isUpdate && isUpdatePassword)
+                            if (!isUpdate &&
+                                isUpdatePassword &&
+                                isUpdatePasswordNewPassword)
                               InputComponent(
                                 controller: newPasswordController,
                                 keyboardType: TextInputType.visiblePassword,
                                 icon: Icons.lock,
-                                label: 'Nova Senha',
+                                label: 'Cadastre Nova Senha',
                                 isSecret: true,
                                 validator: (newPassword) {
-                                  if (newPassword == null || newPassword.isEmpty) {
+                                  if (newPassword == null ||
+                                      newPassword.isEmpty) {
                                     return 'Digite sua nova senha';
                                   }
 
@@ -571,7 +582,9 @@ class _RegisterState extends State<Register> {
                                 },
                               ),
 
-                            if (!isUpdate && isUpdatePassword)
+                            if (!isUpdate &&
+                                isUpdatePassword &&
+                                isUpdatePasswordNewPassword)
                               InputComponent(
                                 controller: confirmNewPasswordController,
                                 keyboardType: TextInputType.visiblePassword,
@@ -592,244 +605,393 @@ class _RegisterState extends State<Register> {
                                   return null;
                                 },
                               ),
-                            
+
                             SizedBox(
-                              height: 50,
-                              child: !isUpdate && !isUpdatePassword                                                             
-                                  ? ElevatedButton(
-                                      style: ElevatedButton.styleFrom(
-                                          shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(18))),
-                                      onPressed: () async {
-                                        if (isLoading == true) {
-                                          return;
-                                        }
+                                height: 50,
+                                child: !isUpdate && !isUpdatePassword
+                                    ? ElevatedButton(
+                                        style: ElevatedButton.styleFrom(
+                                            shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(18))),
+                                        onPressed: () async {
+                                          if (isLoading == true) {
+                                            return;
+                                          }
 
-                                        setState(() {
-                                          isLoading =
-                                              true; // Ativar o estado de carregamento
-                                        });
+                                          setState(() {
+                                            isLoading =
+                                                true; // Ativar o estado de carregamento
+                                          });
 
-                                        FocusScope.of(context).unfocus();
+                                          FocusScope.of(context).unfocus();
 
-                                        if (_formkey.currentState!.validate()) {
-                                          UserModel? userJson =
-                                              UserModel.fromJson({});
+                                          if (_formkey.currentState!
+                                              .validate()) {
+                                            UserModel? userJson =
+                                                UserModel.fromJson({});
 
-                                          await userController.createUser({
-                                            'userName': nickNameController.text,
-                                            'realName': realNameController.text,
-                                            'email': emailController.text,
-                                            'dateOfBirth':
-                                                birthdateController.text,
-                                            'password': passwordController.text,
-                                            'confirmPassword':
-                                                confirmPasswordController.text,
-                                            'mediaAvatar': userAvatar
-                                          }).then((resp) => {
-                                                // print(
-                                                //     '$resp, resp create, ${resp != null}'),
-                                                if (resp != null)
-                                                  {
-                                                    realNameController.text =
-                                                        '',
-                                                    nickNameController.text =
-                                                        '',
-                                                    emailController.text = '',
-                                                    birthdateController.text =
-                                                        '',
-                                                    passwordController.text =
-                                                        '',
-                                                    confirmPasswordController
-                                                        .text = '',
-                                                    setState(() {
-                                                      _image = null;
-                                                      _imagePath = null;
-                                                    }),
-                                                    Future.delayed(
-                                                        const Duration(
-                                                            seconds: 1), () {
-                                                      MySnackbar.show(context,
-                                                          'Parabens!!! Cadastro realizado com sussesso! Realize o Login e aproveite.');
-                                                    }),
-                                                    Future.delayed(
-                                                        const Duration(
-                                                            seconds: 2), () {
+                                            await userController.createUser({
+                                              'userName':
+                                                  nickNameController.text,
+                                              'realName':
+                                                  realNameController.text,
+                                              'email': emailController.text,
+                                              'dateOfBirth':
+                                                  birthdateController.text,
+                                              'password':
+                                                  passwordController.text,
+                                              'confirmPassword':
+                                                  confirmPasswordController
+                                                      .text,
+                                              'mediaAvatar': userAvatar
+                                            }).then((resp) => {
+                                                  // print(
+                                                  //     '$resp, resp create, ${resp != null}'),
+                                                  if (resp != null)
+                                                    {
+                                                      realNameController.text =
+                                                          '',
+                                                      nickNameController.text =
+                                                          '',
+                                                      emailController.text = '',
+                                                      birthdateController.text =
+                                                          '',
+                                                      passwordController.text =
+                                                          '',
+                                                      confirmPasswordController
+                                                          .text = '',
+                                                      setState(() {
+                                                        _image = null;
+                                                        _imagePath = null;
+                                                      }),
+                                                      Future.delayed(
+                                                          const Duration(
+                                                              seconds: 1), () {
+                                                        MySnackbar.show(context,
+                                                            'Parabens!!! Cadastro realizado com sussesso! Realize o Login e aproveite.');
+                                                      }),
+                                                      Future.delayed(
+                                                          const Duration(
+                                                              seconds: 2), () {
+                                                        setState(() {
+                                                          isLoading =
+                                                              false; // Desativar o estado de carregamento
+                                                        });
+                                                        Navigator.of(context)
+                                                            .pushNamed(
+                                                          '/login',
+                                                          arguments: null,
+                                                        );
+                                                      }),
+                                                    }
+                                                  else
+                                                    {
                                                       setState(() {
                                                         isLoading =
                                                             false; // Desativar o estado de carregamento
-                                                      });
-                                                      Navigator.of(context)
-                                                          .pushNamed(
-                                                        '/login',
-                                                        arguments: null,
-                                                      );
-                                                    }),
+                                                      }),
+                                                      MySnackbar.show(context,
+                                                          'Humm...Houve algum erro na criacão do usuário, tente novamente se o erro persistir entre em contato cmo suporte')
+                                                    }
+                                                });
+                                          } else {
+                                            setState(() {
+                                              isLoading =
+                                                  false; // Desativar o estado de carregamento
+                                            });
+                                          }
+                                        },
+                                        child: isLoading
+                                            ? const CircularProgressIndicator(
+                                                valueColor:
+                                                    AlwaysStoppedAnimation(
+                                                        Colors.white),
+                                              ) // Mostrar um indicador de carregamento
+                                            : const Text(
+                                                'Cadastrar Usuário',
+                                                style: TextStyle(
+                                                  fontSize: 18,
+                                                ),
+                                              ),
+                                      )
+                                    : isUpdate && !isUpdatePassword
+                                        ? ElevatedButton(
+                                            style: ElevatedButton.styleFrom(
+                                                shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            18))),
+                                            onPressed: () async {
+                                              FocusScope.of(context).unfocus();
+
+                                              if (isLoading == true) {
+                                                return;
+                                              }
+
+                                              setState(() {
+                                                isLoading =
+                                                    true; // Ativar o estado de carregamento
+                                              });
+
+                                              FocusScope.of(context).unfocus();
+
+                                              if (_formkey.currentState!
+                                                  .validate()) {
+                                                await userController
+                                                    .updatePatchUser(user?.id, {
+                                                  'userName':
+                                                      nickNameController.text,
+                                                  'realName':
+                                                      realNameController.text,
+                                                  'email': emailController.text,
+                                                  'dateOfBirth':
+                                                      birthdateController.text,
+                                                }).then((resp) async => {
+                                                          await authController
+                                                              .refreshToken(),
+                                                          Future.delayed(
+                                                              const Duration(
+                                                                  seconds: 1),
+                                                              () {
+                                                            MySnackbar.show(
+                                                                context,
+                                                                'Dados atualizados com sussesso.');
+                                                          }),
+                                                          Future.delayed(
+                                                              const Duration(
+                                                                  seconds: 2),
+                                                              () {
+                                                            setState(() {
+                                                              isLoading =
+                                                                  false; // Desativar o estado de carregamento
+                                                            });
+                                                          }),
+                                                        });
+                                              } else {
+                                                setState(() {
+                                                  isLoading =
+                                                      false; // Ativar o estado de carregamento
+                                                });
+                                              }
+                                            },
+                                            child: isLoading
+                                                ? const CircularProgressIndicator(
+                                                    valueColor:
+                                                        AlwaysStoppedAnimation(
+                                                            Colors.white),
+                                                  ) // Mostrar um indicador de carregamento
+                                                : const Text(
+                                                    'Atualizar Dados',
+                                                    style: TextStyle(
+                                                      fontSize: 18,
+                                                    ),
+                                                  ),
+                                          )
+                                        : !isUpdatePasswordNewPassword
+                                            ? ElevatedButton(
+                                                style: ElevatedButton.styleFrom(
+                                                    shape:
+                                                        RoundedRectangleBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        18))),
+                                                onPressed: () async {
+                                                  FocusScope.of(context)
+                                                      .unfocus();
+
+                                                  if (isLoading == true) {
+                                                    return;
                                                   }
-                                                else
-                                                  {
+
+                                                  setState(() {
+                                                    isLoading =
+                                                        true; // Ativar o estado de carregamento
+                                                  });
+
+                                                  FocusScope.of(context)
+                                                      .unfocus();
+
+                                                  if (_formkey.currentState!
+                                                      .validate()) {
+                                                    await userController
+                                                        .comparePasswordUser({
+                                                      'password':
+                                                          passwordController
+                                                              .text,
+                                                      'confirmPassword':
+                                                          confirmPasswordController
+                                                              .text
+                                                    }).then((value) => {
+                                                              if (value[
+                                                                      'passwordSendedIsEqualRegistered'] ==
+                                                                  true)
+                                                                {
+                                                                  setState(() {
+                                                                    isLoading =
+                                                                        false;
+                                                                    isUpdatePasswordNewPassword =
+                                                                        true;
+                                                                  }),
+                                                                }
+                                                              else
+                                                                {
+                                                                  Future.delayed(
+                                                                      const Duration(
+                                                                          seconds:
+                                                                              1),
+                                                                      () {
+                                                                    MySnackbar.show(
+                                                                        context,
+                                                                        'Senha inválida.');
+                                                                  }),
+                                                                  Future.delayed(
+                                                                      const Duration(
+                                                                          seconds:
+                                                                              2),
+                                                                      () {
+                                                                    setState(
+                                                                        () {
+                                                                      isLoading =
+                                                                          false; // Desativar o estado de carregamento
+                                                                    });
+                                                                  }),
+                                                                }
+                                                            });
+                                                  } else {
                                                     setState(() {
-                                                      isLoading =
-                                                          false; // Desativar o estado de carregamento
-                                                    }),
-                                                    MySnackbar.show(context,
-                                                        'Humm...Houve algum erro na criacão do usuário, tente novamente se o erro persistir entre em contato cmo suporte')
+                                                      isLoading = false;
+                                                      //isUpdatePasswordNewPassword = true;
+                                                    });
                                                   }
-                                              });
-                                        } else {
-                                          setState(() {
-                                            isLoading =
-                                                false; // Desativar o estado de carregamento
-                                          });
-                                        }
-                                      },
-                                      child: isLoading
-                                          ? const CircularProgressIndicator(
-                                              valueColor:
-                                                  AlwaysStoppedAnimation(
-                                                      Colors.white),
-                                            ) // Mostrar um indicador de carregamento
-                                          : const Text(
-                                              'Cadastrar Usuário',
-                                              style: TextStyle(
-                                                fontSize: 18,
-                                              ),
-                                            ),
-                                    )
-                                  : isUpdate && !isUpdatePassword ? ElevatedButton(
-                                      style: ElevatedButton.styleFrom(
-                                          shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(18))),
-                                      onPressed: () async {
-                                        FocusScope.of(context).unfocus();
+                                                },
+                                                child: isLoading
+                                                    ? const CircularProgressIndicator(
+                                                        valueColor:
+                                                            AlwaysStoppedAnimation(
+                                                                Colors.white),
+                                                      ) // Mostrar um indicador de carregamento
+                                                    : const Text(
+                                                        'Digitar Nova Senha',
+                                                        style: TextStyle(
+                                                          fontSize: 18,
+                                                        ),
+                                                      ),
+                                              )
+                                            : ElevatedButton(
+                                                style: ElevatedButton.styleFrom(
+                                                    shape:
+                                                        RoundedRectangleBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        18))),
+                                                onPressed: () async {
+                                                  FocusScope.of(context)
+                                                      .unfocus();
 
-                                        if (isLoading == true) {
-                                          return;
-                                        }
+                                                  if (isLoading == true) {
+                                                    return;
+                                                  }
 
-                                        setState(() {
-                                          isLoading =
-                                              true; // Ativar o estado de carregamento
-                                        });
-
-                                        FocusScope.of(context).unfocus();
-
-                                        if (_formkey.currentState!.validate()) {
-                                          await userController.updatePatchUser(
-                                              user?.id, {
-                                            'userName': nickNameController.text,
-                                            'realName': realNameController.text,
-                                            'email': emailController.text,
-                                            'dateOfBirth':
-                                                birthdateController.text,
-                                          }).then((resp) async => {
-                                                await authController
-                                                    .refreshToken(),
-                                                Future.delayed(
-                                                    const Duration(seconds: 1),
-                                                    () {
-                                                  MySnackbar.show(context,
-                                                      'Dados atualizados com sussesso.');
-                                                }),
-                                                Future.delayed(
-                                                    const Duration(seconds: 2),
-                                                    () {
                                                   setState(() {
                                                     isLoading =
-                                                        false; // Desativar o estado de carregamento
+                                                        true; // Ativar o estado de carregamento
                                                   });
-                                                }),
-                                              });
-                                        } else {
-                                          setState(() {
-                                            isLoading =
-                                                false; // Ativar o estado de carregamento
-                                          });
-                                        }
-                                      },
-                                      child: isLoading
-                                          ? const CircularProgressIndicator(
-                                              valueColor:
-                                                  AlwaysStoppedAnimation(
-                                                      Colors.white),
-                                            ) // Mostrar um indicador de carregamento
-                                          : const Text(
-                                              'Atualizar Dados',
-                                              style: TextStyle(
-                                                fontSize: 18,
-                                              ),
-                                            ),
-                                    ) 
-                                    : ElevatedButton(
-                                      style: ElevatedButton.styleFrom(
-                                          shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(18))),
-                                      onPressed: () async {
-                                        FocusScope.of(context).unfocus();
 
-                                        if (isLoading == true) {
-                                          return;
-                                        }
+                                                  FocusScope.of(context)
+                                                      .unfocus();
 
-                                        setState(() {
-                                          isLoading =
-                                              true; // Ativar o estado de carregamento
-                                        });
+                                                  if (_formkey.currentState!
+                                                      .validate()) {
+                                                    await userController
+                                                        .updatePasswordUser({
+                                                      'password':
+                                                          passwordController
+                                                              .text,
+                                                      'confirmPassword':
+                                                          confirmPasswordController
+                                                              .text,
+                                                      'newPassword':
+                                                          newPasswordController
+                                                              .text,
+                                                      'confirmNewPassword':
+                                                          confirmNewPasswordController
+                                                              .text,
+                                                    }).then((value) => {
+                                                              if (value == true)
+                                                                {
+                                                                  MySnackbar.show(
+                                                                      context,
+                                                                      'Senha atualizada com seussesso!'),
+                                                                  Future.delayed(
+                                                                      const Duration(
+                                                                          seconds:
+                                                                              4),
+                                                                      () {
+                                                                    setState(
+                                                                        () {
+                                                                      isLoading =
+                                                                          false;
+                                                                      isUpdatePasswordNewPassword =
+                                                                          false;
 
-                                        FocusScope.of(context).unfocus();
-
-                                        if (_formkey.currentState!.validate()) {
-                                          await userController.updatePatchUser(
-                                              user?.id, {
-                                            'userName': nickNameController.text,
-                                            'realName': realNameController.text,
-                                            'email': emailController.text,
-                                            'dateOfBirth':
-                                                birthdateController.text,
-                                          }).then((resp) async => {
-                                                await authController
-                                                    .refreshToken(),
-                                                Future.delayed(
-                                                    const Duration(seconds: 1),
-                                                    () {
-                                                  MySnackbar.show(context,
-                                                      'Dados atualizados com sussesso.');
-                                                }),
-                                                Future.delayed(
-                                                    const Duration(seconds: 2),
-                                                    () {
-                                                  setState(() {
-                                                    isLoading =
-                                                        false; // Desativar o estado de carregamento
-                                                  });
-                                                }),
-                                              });
-                                        } else {
-                                          setState(() {
-                                            isLoading =
-                                                false; // Ativar o estado de carregamento
-                                          });
-                                        }
-                                      },
-                                      child: isLoading
-                                          ? const CircularProgressIndicator(
-                                              valueColor:
-                                                  AlwaysStoppedAnimation(
-                                                      Colors.white),
-                                            ) // Mostrar um indicador de carregamento
-                                          : const Text(
-                                              'Atualizar Nova Senha',
-                                              style: TextStyle(
-                                                fontSize: 18,
-                                              ),
-                                            ),
-                                    ),
-                             
-                                  
-                            )
+                                                                      passwordController
+                                                                          .text = '';
+                                                                      confirmPasswordController
+                                                                          .text = '';
+                                                                      newPasswordController
+                                                                          .text = '';
+                                                                      confirmNewPasswordController
+                                                                          .text = '';
+                                                                    });
+                                                                  }),
+                                                                }
+                                                              else
+                                                                {
+                                                                  Future.delayed(
+                                                                      const Duration(
+                                                                          seconds:
+                                                                              1),
+                                                                      () {
+                                                                    MySnackbar.show(
+                                                                        context,
+                                                                        'Hum... Ocorreu algum erro ao cadastrar a nova senha.');
+                                                                  }),
+                                                                  Future.delayed(
+                                                                      const Duration(
+                                                                          seconds:
+                                                                              2),
+                                                                      () {
+                                                                    setState(
+                                                                        () {
+                                                                      isLoading =
+                                                                          false; // Desativar o estado de carregamento
+                                                                    });
+                                                                  }),
+                                                                }
+                                                            });
+                                                  } else {
+                                                    setState(() {
+                                                      isLoading = false;
+                                                      //isUpdatePasswordNewPassword = true;
+                                                    });
+                                                  }
+                                                },
+                                                child: isLoading
+                                                    ? const CircularProgressIndicator(
+                                                        valueColor:
+                                                            AlwaysStoppedAnimation(
+                                                                Colors.white),
+                                                      ) // Mostrar um indicador de carregamento
+                                                    : const Text(
+                                                        'Cadastrar Nova Senha',
+                                                        style: TextStyle(
+                                                          fontSize: 18,
+                                                        ),
+                                                      ),
+                                              ))
                           ],
                         ),
                       ),

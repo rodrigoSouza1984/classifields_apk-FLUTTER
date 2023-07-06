@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:ffi';
 import 'package:http/http.dart' as http;
 import 'package:classifields_apk_flutter/src/enviroments/enviroments.dart';
 import 'package:classifields_apk_flutter/src/models/user_model.dart';
@@ -89,7 +90,7 @@ class UserController {
       Map<String, String> headers = {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
-      };      
+      };           
 
       http.Response response = await client.patch(Uri.parse('${env.baseUrl}/user/$userId'),
           headers: headers.cast<String, String>(), body: jsonBody);
@@ -209,5 +210,75 @@ class UserController {
   }
 
 
+  Future<dynamic> comparePasswordUser(body) async {
+    try {
+      String jsonBody = jsonEncode(body);
+      String? token = '';      
+      int? userId;
+
+      await userLocalData().then((value) => {
+        token = value.token,
+        userId = value.id        
+      });
+
+      Map<String, String> headers = {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      };      
+
+      print('token, token, $userId');
+
+      http.Response response = await client.post(Uri.parse('${env.baseUrl}/user/comparePasswordUser/$userId'),
+          headers: headers.cast<String, String>(), body: jsonBody);
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        final resp = jsonDecode(response.body);
+
+        return resp;
+      } else {
+        print('aconteceu um erro: ${response.statusCode}, ${response.body}, METHOD => comparePasswordUser');
+        return null;
+      }
+    } catch (e) {
+      print('$e ,Error in create user, METHOD => comparePasswordUser');
+      return null;
+    }
+  }
+
+
+  Future<dynamic> updatePasswordUser(body) async {
+    try {
+      String jsonBody = jsonEncode(body);
+      String? token = '';      
+      int? userId;
+
+      await userLocalData().then((value) => {
+        token = value.token,
+        userId = value.id        
+      });
+
+      Map<String, String> headers = {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      };      
+
+      print('token, token, $body');
+
+      http.Response response = await client.post(Uri.parse('${env.baseUrl}/user/updatePassword/$userId'),
+          headers: headers.cast<String, String>(), body: jsonBody);
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        final resp = jsonDecode(response.body);
+
+        return resp;
+      } else {
+        print('aconteceu um erro: ${response.statusCode}, ${response.body}, METHOD => updatePasswordUser');
+        return null;
+      }
+    } catch (e) {
+      print('$e ,Error in create user, METHOD => updatePasswordUser');
+      return null;
+    }
+  }
 
 }

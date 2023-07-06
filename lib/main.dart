@@ -1,4 +1,4 @@
-import 'package:classifields_apk_flutter/src/pages/register/register.dart';
+import 'package:classifields_apk_flutter/src/pages/register/register_updates_user.dart';
 import 'package:classifields_apk_flutter/src/pages/signIn/sign_in_screen.dart';
 import 'package:classifields_apk_flutter/src/pages/splashScreen/splash_screen.dart';
 import 'package:classifields_apk_flutter/src/pages/home/home.dart';
