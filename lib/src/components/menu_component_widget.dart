@@ -136,20 +136,32 @@ class _MenuComponentWidgetState extends State<MenuComponentWidget> {
     try {
       _selectedValue.value = value;
 
+      print('entroooooooooooooooooooooooooooooooooooooooo, ${value == 'Usuários Cadastrados'}');
+
       if (value == 'Logout') {
         authController
             .logout()
             .then((value) => NavigationService.pushNamed('/login'));
-      } else if (value == 'Dados Cadastrais') {
+      } 
+      
+      else if (value == 'Dados Cadastrais') {
         Map<String, dynamic> arguments = {
           'user': user,
           'updatePassword': false,
         };
 
         NavigationService.pushNamed('/register', arguments: arguments);
-      } else if (value == 'Usuários Cadastrados') {
-        print('Item 2 clicado');
-      } else if (value == 'Trocar Senha') {
+      } 
+      
+      else if (value == 'Usuários Cadastrados') {
+        Map<String, dynamic> arguments = {
+          'user': user,          
+        };       
+        
+        NavigationService.pushNamed('/listUser', arguments: arguments);
+      } 
+      
+      else if (value == 'Trocar Senha') {
         Map<String, dynamic> arguments = {
           'user': user,
           'updatePassword': true,
@@ -157,7 +169,9 @@ class _MenuComponentWidgetState extends State<MenuComponentWidget> {
         
         NavigationService.pushNamed('/register', arguments: arguments);
       }
+
       widget.onItemSelected(value);
+
     } catch (e) {
       print('teste erro aki , $e');
     }
