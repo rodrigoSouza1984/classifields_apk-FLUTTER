@@ -30,7 +30,7 @@ class _MenuComponentWidgetState extends State<MenuComponentWidget> {
 
   List<MenuItem> listFullItems = [
     MenuItem(name: 'Dados Cadastrais', icon: Icons.perm_identity),
-    MenuItem(name: 'Usuários Cadastrados', icon: Icons.perm_identity),
+    MenuItem(name: 'Usuários Cadastrados', icon: Icons.perm_identity),  
     MenuItem(name: 'Trocar Senha', icon: Icons.lock),
     MenuItem(name: 'Logout', icon: Icons.logout),
   ];
@@ -159,7 +159,7 @@ class _MenuComponentWidgetState extends State<MenuComponentWidget> {
         };       
         
         NavigationService.pushNamed('/listUser', arguments: arguments);
-      } 
+      }        
       
       else if (value == 'Trocar Senha') {
         Map<String, dynamic> arguments = {

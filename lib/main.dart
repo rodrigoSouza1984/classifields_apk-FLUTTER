@@ -32,7 +32,7 @@ class MyApp extends StatelessWidget {
         '/login': (ctx) => SignInScreen(),
         '/home': (ctx) => Home(),
         '/register': (ctx) => Register(),
-        '/listUser': (ctx) => UserListPage()
+        '/listUser': (ctx) => UserListPage()        
       },
     );
   }
