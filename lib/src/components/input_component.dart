@@ -95,9 +95,10 @@ class _InputComponentState extends State<InputComponent> {
   }
 
   void _handleFocusChange() async {
+    
     if (!_focusNode.hasFocus) {
       if (widget.label == 'NickName' && widget.controller!.text != '') {//nickname validator function
-        if (!widget.isUpdate) {
+        if (!widget.isUpdate) {          
           nickNameValidator = await userController
               .createUserNameUnique(widget.controller!.text);
 
@@ -112,7 +113,7 @@ class _InputComponentState extends State<InputComponent> {
             });
           }
         } else {
-
+          print('${widget.valueStartInpuWhenIsUpdat!.text}, lllll');
           if (widget.controller!.text !=
               widget.valueStartInpuWhenIsUpdat?.text) {
             nickNameValidator = await userController

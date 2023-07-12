@@ -2,6 +2,7 @@ import 'package:classifields_apk_flutter/src/models/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:classifields_apk_flutter/src/config/color_config_apk.dart';
 import 'package:classifields_apk_flutter/src/controllers/user_controller.dart';
+import 'package:classifields_apk_flutter/src/services/navigator_service_without_context.dart';
 
 class UserListPage extends StatefulWidget {
   UserListPage({Key? key}) : super(key: key);
@@ -46,13 +47,11 @@ class _UserListPageState extends State<UserListPage> {
     if (_scrollController.offset >=
             _scrollController.position.maxScrollExtent &&
         !_scrollController.position.outOfRange) {
-
-          currentPage++; // Incrementa a página atual
-          getAllUsers();      
+      currentPage++; // Incrementa a página atual
+      getAllUsers();
     }
   }
 
-  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -101,12 +100,11 @@ class _UserListPageState extends State<UserListPage> {
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      if (editOrDeleteUsers)
+                      if (!editOrDeleteUsers)
                         IconButton(
-                          icon:
-                              Icon(Icons.delete, size: 20.0, color: Colors.red),
+                          icon: Icon(Icons.arrow_forward_ios, size: 20.0),
                           onPressed: () {
-                            // Ação quando o ícone de lixeira for pressionado
+                            // Ação quando o ícone de seta for pressionado
                           },
                         ),
                       if (editOrDeleteUsers)
@@ -115,13 +113,22 @@ class _UserListPageState extends State<UserListPage> {
                               Icon(Icons.edit, size: 20.0, color: Colors.blue),
                           onPressed: () {
                             // Ação quando o ícone de edição for pressionado
+                            Map<String, dynamic> arguments = {
+                              'user': user,                             
+                              'isUpdateByAdmin': true,
+                              'updatePassword': false
+                            };
+
+                            NavigationService.pushNamed('/register',
+                                arguments: arguments);
                           },
                         ),
-                      if (!editOrDeleteUsers)
+                      if (editOrDeleteUsers)
                         IconButton(
-                          icon: Icon(Icons.arrow_forward_ios, size: 20.0),
+                          icon:
+                              Icon(Icons.delete, size: 20.0, color: Colors.red),
                           onPressed: () {
-                            // Ação quando o ícone de seta for pressionado
+                            // Ação quando o ícone de lixeira for pressionado
                           },
                         ),
                     ],

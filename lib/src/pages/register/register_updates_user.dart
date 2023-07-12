@@ -37,6 +37,7 @@ class _RegisterState extends State<Register> {
   bool isUpdatePassword = false;
   bool isUpdateImage = false;
   String? imageUrlCameRoute = '';
+  bool isUpdateByAdmin = false;
 
   bool isUpdatePasswordNewPassword = false;
 
@@ -86,7 +87,15 @@ class _RegisterState extends State<Register> {
 
   var confirmNewPasswordController = TextEditingController();
 
+  var permissionTypeController = TextEditingController();
+
   var _formkey = GlobalKey<FormState>();
+
+  int? userId;
+
+  String? _opcaoSelecionada;
+
+  List<String> _opcoes = ['user', 'admin'];
 
   @override
   void initState() {
@@ -100,7 +109,7 @@ class _RegisterState extends State<Register> {
       final UserModel user = arguments['user'] as UserModel;
       final bool updatePassword = arguments['updatePassword'] as bool;
 
-      print('user user ${user.id}');
+      print('user user ${user.userName}, ${arguments['updatePassword']}');
 
       if (user != null) {
         setState(() {
@@ -108,17 +117,27 @@ class _RegisterState extends State<Register> {
             isUpdate = true;
             isUpdateImage = true;
           }
-
+          userId = user.id;
           isUpdatePassword = updatePassword;
 
-          if (user?.mediaAvatar?.url != null) {
-            imageUrlCameRoute = user?.mediaAvatar?.url;
+          if (user.mediaAvatar?.url != null) {
+            imageUrlCameRoute = user.mediaAvatar?.url;
           }
 
-          nickNameController = TextEditingController(text: user!.userName);
-          realNameController = TextEditingController(text: user?.realName);
-          emailController = TextEditingController(text: user?.email);
-          birthdateController = TextEditingController(text: user?.dateOfBirth);
+          if (arguments['isUpdateByAdmin'] == true) {
+            isUpdateByAdmin = true;
+          }
+
+          nickNameController = TextEditingController(text: user.userName);
+          realNameController = TextEditingController(text: user.realName);
+          emailController = TextEditingController(text: user.email);
+          birthdateController = TextEditingController(text: user.dateOfBirth);
+
+          if(isUpdateByAdmin){
+            permissionTypeController =
+              TextEditingController(text: user.typePermissionEnum);
+          }
+          
         });
       }
     });
@@ -308,13 +327,13 @@ class _RegisterState extends State<Register> {
 
                                             if (imageUrlCameRoute != '') {
                                               await userController
-                                                  .deleteImageAvatar(user?.id,
+                                                  .deleteImageAvatar(userId,
                                                       user?.mediaAvatar?.name)
                                                   .then((value) async {
                                                 if (value == true) {
                                                   await userController
                                                       .addMediaAvatarUser(
-                                                          user?.id, userAvatar)
+                                                          userId, userAvatar)
                                                       .then((value) async {
                                                     await authController
                                                         .refreshToken();
@@ -339,7 +358,7 @@ class _RegisterState extends State<Register> {
                                             } else {
                                               await userController
                                                   .addMediaAvatarUser(
-                                                      user?.id, userAvatar)
+                                                      userId, userAvatar)
                                                   .then((value) async {
                                                 await authController
                                                     .refreshToken();
@@ -384,7 +403,7 @@ class _RegisterState extends State<Register> {
                                             });
 
                                             await userController
-                                                .deleteImageAvatar(user?.id,
+                                                .deleteImageAvatar(userId,
                                                     user?.mediaAvatar?.name)
                                                 .then((value) async {
                                               if (value == true) {
@@ -424,10 +443,8 @@ class _RegisterState extends State<Register> {
                             if (!isUpdatePassword)
                               InputComponent(
                                 controller: nickNameController,
-                                valueStartInpuWhenIsUpdat: isUpdate
-                                    ? TextEditingController(
-                                        text: user?.userName)
-                                    : null,
+                                valueStartInpuWhenIsUpdat:
+                                    isUpdate ? nickNameController : null,
                                 keyboardType: TextInputType.text,
                                 icon: Icons.account_circle,
                                 label: 'NickName',
@@ -464,9 +481,8 @@ class _RegisterState extends State<Register> {
                             if (!isUpdatePassword)
                               InputComponent(
                                 controller: emailController,
-                                valueStartInpuWhenIsUpdat: isUpdate
-                                    ? TextEditingController(text: user?.email)
-                                    : null,
+                                valueStartInpuWhenIsUpdat:
+                                    isUpdate ? emailController : null,
                                 keyboardType: TextInputType.emailAddress,
                                 isUpdate: isUpdate ? isUpdate : false,
                                 icon: Icons.email,
@@ -606,6 +622,42 @@ class _RegisterState extends State<Register> {
                                 },
                               ),
 
+                            if (isUpdate &&
+                                !isUpdatePassword &&
+                                !isUpdatePasswordNewPassword &&
+                                isUpdateByAdmin)
+                              SizedBox(
+                                height:
+                                    80, // Ajuste a altura conforme necessário
+                                child: InputDecorator(
+                                  decoration: InputDecoration(
+                                    labelText: 'Permissão do usuário',
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(16.0),
+                                    ),
+                                    prefixIcon: Icon(Icons.security),
+                                  ),
+                                  child: DropdownButtonHideUnderline(
+                                    child: DropdownButton<String>(
+                                      isDense: true,
+                                      value: permissionTypeController.text,
+                                      onChanged: (String? novaOpcao) {
+                                        setState(() {                                         
+                                          permissionTypeController.text =
+                                              novaOpcao ?? '';
+                                        });
+                                      },
+                                      items: _opcoes.map((String opcao) {
+                                        return DropdownMenuItem<String>(
+                                          value: opcao,
+                                          child: Text(opcao),
+                                        );
+                                      }).toList(),
+                                    ),
+                                  ),
+                                ),
+                              ),
+
                             SizedBox(
                                 height: 50,
                                 child: !isUpdate && !isUpdatePassword
@@ -736,38 +788,66 @@ class _RegisterState extends State<Register> {
 
                                               FocusScope.of(context).unfocus();
 
+                                              var userUpdateByUser;
+                                              var userUpdateByAdminUser; 
+
                                               if (_formkey.currentState!
                                                   .validate()) {
+                                                if (isUpdateByAdmin) {
+                                                  userUpdateByAdminUser = {
+                                                    'userName':
+                                                        nickNameController.text,
+                                                    'realName':
+                                                        realNameController.text,
+                                                    'email':
+                                                        emailController.text,
+                                                    'dateOfBirth':
+                                                        birthdateController
+                                                            .text,
+                                                    'typePermissionEnum':
+                                                        permissionTypeController
+                                                            .text
+                                                  };
+                                                } else {
+                                                  userUpdateByUser = {
+                                                    'userName':
+                                                        nickNameController.text,
+                                                    'realName':
+                                                        realNameController.text,
+                                                    'email':
+                                                        emailController.text,
+                                                    'dateOfBirth':
+                                                        birthdateController
+                                                            .text,
+                                                  };
+                                                }
+
+                                                var objectUserToSend = isUpdateByAdmin ? userUpdateByAdminUser : userUpdateByUser;
                                                 await userController
-                                                    .updatePatchUser(user?.id, {
-                                                  'userName':
-                                                      nickNameController.text,
-                                                  'realName':
-                                                      realNameController.text,
-                                                  'email': emailController.text,
-                                                  'dateOfBirth':
-                                                      birthdateController.text,
-                                                }).then((resp) async => {
-                                                          await authController
-                                                              .refreshToken(),
-                                                          Future.delayed(
-                                                              const Duration(
-                                                                  seconds: 1),
-                                                              () {
-                                                            MySnackbar.show(
-                                                                context,
-                                                                'Dados atualizados com sussesso.');
-                                                          }),
-                                                          Future.delayed(
-                                                              const Duration(
-                                                                  seconds: 2),
-                                                              () {
-                                                            setState(() {
-                                                              isLoading =
-                                                                  false; // Desativar o estado de carregamento
+                                                    .updatePatchUser(userId, objectUserToSend).then(
+                                                        (resp) async => {
+                                                              await authController
+                                                                  .refreshToken(),
+                                                              Future.delayed(
+                                                                  const Duration(
+                                                                      seconds:
+                                                                          1),
+                                                                  () {
+                                                                MySnackbar.show(
+                                                                    context,
+                                                                    'Dados atualizados com sussesso.');
+                                                              }),
+                                                              Future.delayed(
+                                                                  const Duration(
+                                                                      seconds:
+                                                                          2),
+                                                                  () {
+                                                                setState(() {
+                                                                  isLoading =
+                                                                      false; // Desativar o estado de carregamento
+                                                                });
+                                                              }),
                                                             });
-                                                          }),
-                                                        });
                                               } else {
                                                 setState(() {
                                                   isLoading =
