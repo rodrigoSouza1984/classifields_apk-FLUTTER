@@ -12,7 +12,7 @@ class MenuItem {
 }
 
 class MenuComponentWidget extends StatefulWidget {
-  final Function(String) onItemSelected;
+  final Function(String, int?) onItemSelected;
   final String pageCallThisComponent;
 
   const MenuComponentWidget(
@@ -32,6 +32,7 @@ class _MenuComponentWidgetState extends State<MenuComponentWidget> {
     MenuItem(name: 'Dados Cadastrais', icon: Icons.perm_identity),
     MenuItem(name: 'Usuários Cadastrados', icon: Icons.perm_identity),  
     MenuItem(name: 'Trocar Senha', icon: Icons.lock),
+    MenuItem(name: 'Excluir Cadastro', icon: Icons.delete),
     MenuItem(name: 'Logout', icon: Icons.logout),
   ];
 
@@ -74,6 +75,9 @@ class _MenuComponentWidgetState extends State<MenuComponentWidget> {
 
     listWithFilterShowMenu.add(listFullItems[
         listFullItems.indexWhere((item) => item.name == 'Trocar Senha')]);
+
+    listWithFilterShowMenu.add(listFullItems[
+        listFullItems.indexWhere((item) => item.name == 'Excluir Cadastro')]);
 
     listWithFilterShowMenu.add(listFullItems[
         listFullItems.indexWhere((item) => item.name == 'Logout')]);
@@ -134,9 +138,7 @@ class _MenuComponentWidgetState extends State<MenuComponentWidget> {
 
   void _handleItemSelected(String value) async {
     try {
-      _selectedValue.value = value;
-
-      print('entroooooooooooooooooooooooooooooooooooooooo, ${value == 'Usuários Cadastrados'}');
+      _selectedValue.value = value;       
 
       if (value == 'Logout') {
         authController
@@ -168,9 +170,9 @@ class _MenuComponentWidgetState extends State<MenuComponentWidget> {
         };
         
         NavigationService.pushNamed('/register', arguments: arguments);
-      }
+      }      
 
-      widget.onItemSelected(value);
+      widget.onItemSelected(value, user.id);
 
     } catch (e) {
       print('teste erro aki , $e');

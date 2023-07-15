@@ -6,6 +6,7 @@ class CustomModal extends StatefulWidget {
   final List<Widget> inputs;
   final List<ButtonConfig> buttons;
   final Function(String)? returnModalForgetPassword;
+  final Function(String)? returnButtonNameClick;
   final BuildContext context;
 
   CustomModal({
@@ -13,6 +14,7 @@ class CustomModal extends StatefulWidget {
     required this.inputs,
     required this.buttons,
     this.returnModalForgetPassword,
+    this.returnButtonNameClick,
     required this.context,
   });
 
@@ -122,12 +124,16 @@ class _CustomModalState extends State<CustomModal> {
         // Executa a lógica para o botão OK
         if (widget.returnModalForgetPassword != null) {
           widget.returnModalForgetPassword!(_email);
+          widget.returnButtonNameClick!(name);
+        }else{
+          widget.returnButtonNameClick!(name);
         }
 
-        //Navigator.pop(context);
+        //Navigator.pop(context);                   //=> esta comentado pq faco esse mesmo pop no retorno onde eh chamado por exemplo no delete ai ele mostra a msg no snack e tira o modal se tiver aki o pop ele da pau no snack bar msg e nao mostra
       }
     } else if (name == 'Cancelar') {
       // Executa a lógica para o botão Cancelar
+      widget.returnButtonNameClick!(name);
       Navigator.pop(context);
     }
   }

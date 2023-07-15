@@ -318,4 +318,30 @@ class UserController {
       return null;
     }
   }
+
+  Future<dynamic> deleteUserById(int? userId) async {
+    try {
+      String? token = '';
+
+      await userLocalData().then((value) => {token = value.token});
+
+      Map<String, String> headers = {
+        'Authorization': 'Bearer $token',
+      };      
+
+      http.Response response = await client
+          .delete(Uri.parse('${env.baseUrl}/user/$userId'), headers: headers);
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {     
+
+        return jsonDecode(response.body);
+
+      } else {
+        print('aconteceu um erro: ${response.statusCode}, method: deleteUserById user controller');
+      }
+    } catch (e) {
+      throw Exception('$e ,Error in delete user, method: deleteUserById user controller');
+    }
+  }
+
 }

@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:classifields_apk_flutter/src/config/color_config_apk.dart';
 import 'package:classifields_apk_flutter/src/controllers/user_controller.dart';
 import 'package:classifields_apk_flutter/src/services/navigator_service_without_context.dart';
+import 'package:classifields_apk_flutter/src/components/center_modal_inputs_buttons.dart';
+import 'package:classifields_apk_flutter/src/services/snack_bar_service.dart';
 
 class UserListPage extends StatefulWidget {
   UserListPage({Key? key}) : super(key: key);
@@ -114,7 +116,7 @@ class _UserListPageState extends State<UserListPage> {
                           onPressed: () {
                             // Ação quando o ícone de edição for pressionado
                             Map<String, dynamic> arguments = {
-                              'user': user,                             
+                              'user': user,
                               'isUpdateByAdmin': true,
                               'updatePassword': false
                             };
@@ -129,6 +131,61 @@ class _UserListPageState extends State<UserListPage> {
                               Icon(Icons.delete, size: 20.0, color: Colors.red),
                           onPressed: () {
                             // Ação quando o ícone de lixeira for pressionado
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return CustomModal(
+                                  context: context,
+                                  title:
+                                      'Tem certeza que deseja DELETAR esse usuário?',
+                                  inputs: [],
+                                  buttons: [
+                                    ButtonConfig(
+                                        name: 'OK', color: Colors.green),
+                                    ButtonConfig(
+                                        name: 'Cancelar', color: Colors.red),
+                                  ],
+                                  returnButtonNameClick: (value) {
+                                    if (value == 'OK') {
+                                      userController
+                                          .deleteUserById(user.id)
+                                          .then((deleted) => {
+                                                if (deleted == true)
+                                                  {
+                                                    Future.delayed(
+                                                        const Duration(
+                                                            seconds: 0), () {
+                                                      MySnackbar.show(context,
+                                                          'Usuário Deletado com sucesso!');
+                                                    }),
+                                                    Future.delayed(
+                                                        const Duration(
+                                                            seconds: 2), () {
+                                                      Navigator.pop(context);
+                                                    }),
+                                                  }
+                                                else
+                                                  {
+                                                    {
+                                                      Future.delayed(
+                                                          const Duration(
+                                                              seconds: 0), () {
+                                                        MySnackbar.show(context,
+                                                            'Ocorreu algum erro ao tentar deletar usuário');
+                                                      }),
+                                                      Future.delayed(
+                                                          const Duration(
+                                                              seconds: 2), () {
+                                                        Navigator.pop(context);
+                                                      }),
+                                                    }
+                                                  }
+                                              });
+                                    }
+                                  },
+                                );
+                              },
+                            );
                           },
                         ),
                     ],
