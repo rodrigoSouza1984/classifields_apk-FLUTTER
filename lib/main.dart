@@ -5,6 +5,7 @@ import 'package:classifields_apk_flutter/src/pages/home/home.dart';
 import 'package:classifields_apk_flutter/src/services/navigator_service_without_context.dart';
 import 'package:flutter/material.dart';
 import 'package:classifields_apk_flutter/src/pages/user/list_user.dart';
+import 'package:classifields_apk_flutter/src/pages/user/user_profile.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,7 +33,8 @@ class MyApp extends StatelessWidget {
         '/login': (ctx) => SignInScreen(),
         '/home': (ctx) => Home(),
         '/register': (ctx) => Register(),
-        '/listUser': (ctx) => UserListPage()        
+        '/listUser': (ctx) => UserListPage(),     
+        '/userProfile': (ctx) => UserProfile()    
       },
     );
   }
