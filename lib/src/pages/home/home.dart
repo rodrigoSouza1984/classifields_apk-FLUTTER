@@ -8,8 +8,6 @@ import 'package:classifields_apk_flutter/src/services/snack_bar_service.dart';
 import 'package:classifields_apk_flutter/src/services/navigator_service_without_context.dart';
 
 import 'package:classifields_apk_flutter/src/components/footer_tabs_component.dart';
-import 'package:classifields_apk_flutter/src/services/navigator_service_without_context.dart';
-import 'package:classifields_apk_flutter/src/pages/register/register_updates_user.dart';
 import 'package:classifields_apk_flutter/src/pages/user/user_profile.dart';
 
 class Home extends StatefulWidget {
@@ -36,7 +34,7 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: !showAppBar && showAppBarWhenScroll
+      appBar: showAppBar && !showAppBarWhenScroll
           ? AppBar(
               automaticallyImplyLeading: false, // Remove a seta de voltar
               backgroundColor: CustomColors.customSwatchColor,
@@ -151,7 +149,7 @@ class _HomeState extends State<Home> {
             });
           } else {
             setState(() {
-              showAppBar = false;
+              showAppBar = true;
               _screen = Container();
             });
           }

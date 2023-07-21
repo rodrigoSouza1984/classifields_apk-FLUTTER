@@ -6,6 +6,8 @@ import 'package:classifields_apk_flutter/src/services/navigator_service_without_
 import 'package:flutter/material.dart';
 import 'package:classifields_apk_flutter/src/pages/user/list_user.dart';
 import 'package:classifields_apk_flutter/src/pages/user/user_profile.dart';
+import 'package:classifields_apk_flutter/src/Providers/user_provider.dart';
+import 'package:provider/provider.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,24 +20,29 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(        
-        primarySwatch: Colors.green,
-        scaffoldBackgroundColor: Colors.white.withAlpha(230)//250 eh branco      
-      ),      
-      //home: Home(),
-      navigatorKey: NavigationService.navigatorKey,//aki para navegar sem contexto
-      initialRoute: '/splash',				
-      routes: {							        
-        '/splash': (ctx) => const SplashScreen(),
-        '/login': (ctx) => SignInScreen(),
-        '/home': (ctx) => Home(),
-        '/register': (ctx) => Register(),
-        '/listUser': (ctx) => UserListPage(),     
-        '/userProfile': (ctx) => UserProfile()    
-      },
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => UserProvider())
+      ],
+      child: MaterialApp(
+        title: 'Flutter Demo',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(        
+          primarySwatch: Colors.green,
+          scaffoldBackgroundColor: Colors.white.withAlpha(230)//250 eh branco      
+        ),      
+        //home: Home(),
+        navigatorKey: NavigationService.navigatorKey,//aki para navegar sem contexto
+        initialRoute: '/splash',				
+        routes: {							        
+          '/splash': (ctx) => const SplashScreen(),
+          '/login': (ctx) => SignInScreen(),
+          '/home': (ctx) => Home(),
+          '/register': (ctx) => Register(),
+          '/listUser': (ctx) => UserListPage(),     
+          '/userProfile': (ctx) => UserProfile()    
+        },
+      ),
     );
   }
 }

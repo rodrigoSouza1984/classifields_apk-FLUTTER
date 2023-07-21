@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:classifields_apk_flutter/src/utils/format_date.dart';
 
 import 'package:classifields_apk_flutter/src/controllers/user_controller.dart';
+import 'dart:async';
 
 class InputComponent extends StatefulWidget {
   final IconData icon;
   final String label;
+  final bool? labelIntern;
   final bool readOnly;
   final bool isDate;
   final bool isSecret;
@@ -14,27 +16,32 @@ class InputComponent extends StatefulWidget {
   final TextEditingController? controller;
   final String? Function(String?)? validator;
   final ValueChanged<String>? onChanged;
+  final VoidCallback? clearInputSearchCallBack;
+  final bool? searchButton;
 
   bool isUpdate;
   final TextEditingController? valueStartInpuWhenIsUpdat;
 
   bool isObscure = false; //don't need receive by constructor
 
-  InputComponent({
-    Key? key,
-    required this.icon,
-    required this.label,
-    this.readOnly = false,
-    this.keyboardType,
-    this.isDate = false,
-    this.isSecret = false,
-    this.errorText = false,
-    this.controller,
-    this.validator,
-    this.onChanged,
-    this.isUpdate = false,
-    this.valueStartInpuWhenIsUpdat,
-  }) : super(key: key);
+  InputComponent(
+      {Key? key,
+      required this.icon,
+      required this.label,
+      this.readOnly = false,
+      this.keyboardType,
+      this.isDate = false,
+      this.isSecret = false,
+      this.errorText = false,
+      this.controller,
+      this.validator,
+      this.onChanged,
+      this.isUpdate = false,
+      this.valueStartInpuWhenIsUpdat,
+      this.labelIntern = false,
+      this.searchButton = false,
+      this.clearInputSearchCallBack})
+      : super(key: key);
 
   @override
   State<InputComponent> createState() => _InputComponentState();
@@ -54,6 +61,9 @@ class _InputComponentState extends State<InputComponent> {
   bool hasDate = false;
 
   bool isObscure = false;
+
+  bool inputWithLetter = false;
+  Timer? _debounceTimer;
 
   late FocusNode _focusNode;
 
@@ -95,10 +105,10 @@ class _InputComponentState extends State<InputComponent> {
   }
 
   void _handleFocusChange() async {
-    
     if (!_focusNode.hasFocus) {
-      if (widget.label == 'NickName' && widget.controller!.text != '') {//nickname validator function
-        if (!widget.isUpdate) {          
+      if (widget.label == 'NickName' && widget.controller!.text != '') {
+        //nickname validator function
+        if (!widget.isUpdate) {
           nickNameValidator = await userController
               .createUserNameUnique(widget.controller!.text);
 
@@ -129,15 +139,14 @@ class _InputComponentState extends State<InputComponent> {
                 errorText = '';
               });
             }
-
           } else {
             setState(() {
               errorText = '';
             });
           }
-
         }
-      } else if (widget.label == 'Email' && widget.controller!.text != '') {//email validator functions
+      } else if (widget.label == 'Email' && widget.controller!.text != '') {
+        //email validator functions
         if (!widget.isUpdate) {
           emailExists =
               await userController.verifyEmailExists(widget.controller!.text);
@@ -151,8 +160,7 @@ class _InputComponentState extends State<InputComponent> {
               errorText = '';
             });
           }
-        } else {       
-
+        } else {
           if (widget.controller!.text !=
               widget.valueStartInpuWhenIsUpdat?.text) {
             emailExists =
@@ -168,16 +176,38 @@ class _InputComponentState extends State<InputComponent> {
                 errorText = '';
               });
             }
-
           } else {
             setState(() {
               errorText = '';
             });
-            
           }
         }
       }
     }
+  }
+
+  void _onTextChanged(String value) {
+    if (_debounceTimer != null && _debounceTimer!.isActive) {
+      _debounceTimer!.cancel();
+    }
+
+    // Configure o tempo de atraso aqui (por exemplo, 500ms)
+    const Duration debounceTime = Duration(milliseconds: 1000);
+
+    _debounceTimer = Timer(debounceTime, () {
+      // O código aqui será executado após o tempo de atraso, apenas se não houver outra entrada durante esse período.
+      widget.onChanged?.call(value);
+
+      if (value.length > 0) {
+        setState(() {
+          inputWithLetter = true;
+        });
+      } else {
+        setState(() {
+          inputWithLetter = false;
+        });
+      }
+    });
   }
 
   @override
@@ -186,7 +216,7 @@ class _InputComponentState extends State<InputComponent> {
       padding: const EdgeInsets.only(bottom: 15),
       child: TextFormField(
         controller: widget.controller,
-        onChanged: widget.onChanged,
+        onChanged: _onTextChanged,
         onTap: () async {
           if (widget.isDate != true) {
             return;
@@ -212,11 +242,25 @@ class _InputComponentState extends State<InputComponent> {
                   icon:
                       Icon(isObscure ? Icons.visibility : Icons.visibility_off),
                 )
-              : null,
+              : widget.searchButton == true
+                  ? IconButton(
+                      onPressed: () {
+                        widget.controller!.clear();
+                        widget
+                            .clearInputSearchCallBack!(); // Chamando o callback onClear
+                        setState(() {
+                          inputWithLetter = false;
+                        });
+                      },
+                      icon: Icon(inputWithLetter ? Icons.clear : null),
+                    )
+                  : null,
           labelText: widget.label,
           errorText: widget.errorText && errorText != '' ? errorText : null,
           isDense: true,
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(18)),
+          floatingLabelBehavior:
+              widget.labelIntern == true ? FloatingLabelBehavior.never : null,
         ),
       ),
     );

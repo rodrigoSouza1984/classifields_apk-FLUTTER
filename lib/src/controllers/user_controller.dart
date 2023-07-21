@@ -344,4 +344,39 @@ class UserController {
     }
   }
 
+
+  Future<dynamic> getUsersByUserNameLikeFilter(String? userName) async {
+    try {
+
+      if(userName == ''){
+        return;
+      }
+
+      String? token = await userLocalData().then((value) => value.token);
+
+      Map<String, String> headers = {
+        'Authorization': 'Bearer $token',
+      };      
+
+      http.Response response = await client.get(
+        Uri.parse('${env.baseUrl}/user/getByLikeFilter/list-by-filter-like?userName=$userName'),
+        headers: headers,
+      );      
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        List<dynamic> data = jsonDecode(response.body)['users'];
+        int total = jsonDecode(response.body)['total'];
+        List<UserModel> users =
+            data.map((userJson) => UserModel.fromMap(userJson)).toList();
+            
+        return {'total': total,'users': users};
+      } else {
+        print('aconteceu um erro: ${response.statusCode}');
+        return [];
+      }
+    } catch (e) {
+      throw Exception('Error in getUsers: $e');
+    }
+  }
+
 }

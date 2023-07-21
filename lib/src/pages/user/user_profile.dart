@@ -1,35 +1,121 @@
 import 'package:flutter/material.dart';
 import 'package:classifields_apk_flutter/src/config/color_config_apk.dart';
 
-class UserProfile extends StatelessWidget {
-  const UserProfile({Key? key}) : super(key: key);
+import 'package:classifields_apk_flutter/src/controllers/user_controller.dart';
+import 'package:classifields_apk_flutter/src/models/user_model.dart';
+
+class UserProfile extends StatefulWidget {
+  UserProfile({Key? key}) : super(key: key);
+
+  @override
+  State<UserProfile> createState() => _UserProfileState();
+}
+
+class _UserProfileState extends State<UserProfile> {
+  final UserController userController = UserController();
+  UserModel user = UserModel();
+  String selectedButton = 'Todos';
+  UserModel? userNavigation;
+  bool userByNavigation = false;
+
+  @override
+  initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // Acesso aos argumentos da rota
+      userNavigation = ModalRoute.of(context)?.settings.arguments as UserModel?;     
+
+      print('user user ${user.userName}');
+
+      if (userNavigation != null) {
+
+        final UserModel userGetNavigation = userNavigation as UserModel;
+
+        setState(() {
+          user = userGetNavigation;
+          userByNavigation = true;
+        });
+      } else {
+        getLocalUser();
+      }
+    });
+  }
+
+  getLocalUser() async {
+    final userLocal = await userController.userLocalData();
+
+    if (userLocal != null) {
+      setState(() {
+        user = userLocal;
+      });
+    } else {
+      print(
+          'erro ao buscar usuario no storage $userLocal, metodo : getLocalUser');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: CustomColors.customSwatchColor,
+
+      appBar: userByNavigation ? AppBar(
+              automaticallyImplyLeading: true, // Remove a seta de voltar
+              backgroundColor: CustomColors.customSwatchColor,
+              elevation: 0,
+              centerTitle: true,
+              title: Text.rich(
+                TextSpan(
+                  style: const TextStyle(
+                    fontSize: 30,
+                  ),
+                  children: [
+                    const TextSpan(
+                      text: 'Classi',
+                      style: TextStyle(
+                        color: Colors.white,
+                      ),
+                    ),
+                    TextSpan(
+                      text: 'Fields',
+                      style: TextStyle(
+                        color: CustomColors.customContrastColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ): null,
+
       body: Column(
         children: [
-          const Expanded(
+          Expanded(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                SizedBox(height: 50),
+                //const SizedBox(height: 10),
 
                 Align(
                   alignment: Alignment.center,
-                  child: CircleAvatar(
-                    radius: 50,
-                    backgroundImage:
-                        AssetImage('assets/images/avatarzinho.jpg'),
-                  ),
+                  child: user.mediaAvatar?.url != null
+                      ? CircleAvatar(
+                          radius: 50,
+                          backgroundImage:
+                              NetworkImage(user.mediaAvatar?.url ?? ''),
+                        )
+                      : const CircleAvatar(
+                          radius: 50,
+                          backgroundImage:
+                              AssetImage('assets/images/avatarzinho.jpg'),
+                        ),
                 ),
 
-                SizedBox(height: 30),
+                const SizedBox(height: 30),
                 // Espaçamento entre o avatar e o texto
                 Text(
-                  'Rodrigo',
-                  style: TextStyle(
+                  user.userName ?? '',
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 35,
                   ),
@@ -37,8 +123,6 @@ class UserProfile extends StatelessWidget {
               ],
             ),
           ),
-
-          
           Expanded(
             child: Container(
               color: Colors.white,
@@ -62,15 +146,19 @@ class UserProfile extends StatelessWidget {
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceAround,
                                 children: [
-
                                   TextButton(
                                     onPressed: () {
                                       // Ação do primeiro botão
+                                      setState(() {
+                                        selectedButton = 'Todos';
+                                      });
                                     },
                                     child: Container(
                                       decoration: BoxDecoration(
-                                        color:
-                                            null, // Defina a cor de fundo desejada
+                                        color: selectedButton == 'Todos'
+                                            ? Colors.grey
+                                            : Colors
+                                                .white, // Defina a cor de fundo desejada
                                         borderRadius: BorderRadius.circular(
                                             8), // Ajuste o raio do canto do botão
                                       ),
@@ -78,26 +166,34 @@ class UserProfile extends StatelessWidget {
                                           horizontal: 16,
                                           vertical:
                                               8), // Ajuste o espaçamento interno do botão
-                                      child: const Text(
+                                      child: Text(
                                         'Todos',
                                         style: TextStyle(
                                           fontSize:
                                               12, // Ajuste o tamanho do texto
-                                          color: Colors
-                                              .grey, // Ajuste a cor do texto
+                                          color: selectedButton == 'Todos'
+                                              ? Colors.white
+                                              : Colors
+                                                  .grey, // Ajuste a cor do texto
                                         ),
                                       ),
                                     ),
                                   ),
-
                                   TextButton(
                                     onPressed: () {
                                       // Ação do primeiro botão
+                                      setState(() {
+                                        selectedButton = 'Casas';
+                                      });
+
+                                      print('casas $selectedButton');
                                     },
                                     child: Container(
                                       decoration: BoxDecoration(
-                                        color:
-                                            null, // Defina a cor de fundo desejada
+                                        color: selectedButton == 'Casas'
+                                            ? Colors.grey
+                                            : Colors
+                                                .white, // Defina a cor de fundo desejada
                                         borderRadius: BorderRadius.circular(
                                             8), // Ajuste o raio do canto do botão
                                       ),
@@ -105,13 +201,15 @@ class UserProfile extends StatelessWidget {
                                           horizontal: 16,
                                           vertical:
                                               8), // Ajuste o espaçamento interno do botão
-                                      child: const Text(
+                                      child: Text(
                                         'Casas',
                                         style: TextStyle(
                                           fontSize:
                                               12, // Ajuste o tamanho do texto
-                                          color: Colors
-                                              .grey, // Ajuste a cor do texto
+                                          color: selectedButton == 'Casas'
+                                              ? Colors.white
+                                              : Colors
+                                                  .grey, // Ajuste a cor do texto
                                         ),
                                       ),
                                     ),
@@ -119,11 +217,16 @@ class UserProfile extends StatelessWidget {
                                   TextButton(
                                     onPressed: () {
                                       // Ação do primeiro botão
+                                      setState(() {
+                                        selectedButton = 'Chacáras';
+                                      });
                                     },
                                     child: Container(
                                       decoration: BoxDecoration(
-                                        color:
-                                            null, // Defina a cor de fundo desejada
+                                        color: selectedButton == 'Chacáras'
+                                            ? Colors.grey
+                                            : Colors
+                                                .white, // Defina a cor de fundo desejada
                                         borderRadius: BorderRadius.circular(
                                             8), // Ajuste o raio do canto do botão
                                       ),
@@ -131,13 +234,15 @@ class UserProfile extends StatelessWidget {
                                           horizontal: 16,
                                           vertical:
                                               8), // Ajuste o espaçamento interno do botão
-                                      child: const Text(
+                                      child: Text(
                                         'Chacáras',
                                         style: TextStyle(
                                           fontSize:
                                               12, // Ajuste o tamanho do texto
-                                          color: Colors
-                                              .grey, // Ajuste a cor do texto
+                                          color: selectedButton == 'Chacáras'
+                                              ? Colors.white
+                                              : Colors
+                                                  .grey, // Ajuste a cor do texto
                                         ),
                                       ),
                                     ),
@@ -145,11 +250,17 @@ class UserProfile extends StatelessWidget {
                                   TextButton(
                                     onPressed: () {
                                       // Ação do primeiro botão
+                                      setState(() {
+                                        selectedButton = 'Salão de Festas';
+                                      });
                                     },
                                     child: Container(
                                       decoration: BoxDecoration(
-                                        color: Colors
-                                            .grey, // Defina a cor de fundo desejada
+                                        color: selectedButton ==
+                                                'Salão de Festas'
+                                            ? Colors.grey
+                                            : Colors
+                                                .white, // Defina a cor de fundo desejada
                                         borderRadius: BorderRadius.circular(
                                             8), // Ajuste o raio do canto do botão
                                       ),
@@ -157,13 +268,16 @@ class UserProfile extends StatelessWidget {
                                           horizontal: 16,
                                           vertical:
                                               8), // Ajuste o espaçamento interno do botão
-                                      child: const Text(
+                                      child: Text(
                                         'Salão de Festas',
                                         style: TextStyle(
                                           fontSize:
                                               12, // Ajuste o tamanho do texto
-                                          color: Colors
-                                              .white, // Ajuste a cor do texto
+                                          color: selectedButton ==
+                                                  'Salão de Festas'
+                                              ? Colors.white
+                                              : Colors
+                                                  .grey, // Ajuste a cor do texto
                                         ),
                                       ),
                                     ),
