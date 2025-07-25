@@ -1,5 +1,7 @@
 # classifields_apk_flutter
 
+app consome api no google gcp feita com nest js, postgres, controla fluxo de usuario com crud login refresh token
+
 A new Flutter project.
 
 ## Getting Started
