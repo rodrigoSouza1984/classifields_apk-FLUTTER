@@ -2,6 +2,11 @@
 
 app consome api no google gcp feita com nest js, postgres, controla fluxo de usuario com crud login refresh token
 
+CONTROLE DE ESTADO - COM PROVIDER (ESTA COMENTADO MAIS FUNCIONA), COM GETX
+ADIÇÃO DE IMAGENS NO USUARIO PARA CRIAR CADASTRO
+LISTAGEM DE USUARIOS E MUITO MAIS
+
+
 A new Flutter project.
 
 ## Getting Started
